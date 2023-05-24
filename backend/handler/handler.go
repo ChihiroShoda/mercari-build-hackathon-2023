@@ -490,12 +490,14 @@ func (h *Handler) Purchase(c echo.Context) error {
 
 	// TODO: if it is fail here, item status is still sold
 	// TODO: balance consistency
-	// TODO: not to buy own items. 自身の商品を買おうとしていたら、http.StatusPreconditionFailed(412)
 	if err := h.UserRepo.UpdateBalance(ctx, userID, user.Balance-item.Price); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	sellerID := item.UserID
+	if sellerID == userID {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
+	}
 
 	seller, err := h.UserRepo.GetUser(ctx, sellerID)
 	// TODO: not found handling
