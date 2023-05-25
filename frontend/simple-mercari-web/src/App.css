@@ -188,3 +188,19 @@ img{
   align-items: center;
   justify-content: left;
 }
+
+.SignupContainer{
+  width: 100%;
+  display: flex;
+  justify-content:center;
+  margin-top:200px;
+}
+.LoginContainer{
+  width: 100%;
+  display: flex;
+  justify-content:center;
+  margin-bottom:200px;
+}
+.SigninContainer p{
+  text-align: center;
+}
