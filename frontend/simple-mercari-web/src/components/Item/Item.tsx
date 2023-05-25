@@ -36,21 +36,20 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   }, [item]);
 
   return (
-    <div>
-      <h3>{item.name}</h3>
-      <img
-        src={itemImage}
-        alt={item.name}
-        height={480}
-        width={480}
-        onClick={() => navigate(`/item/${item.id}`)}
-      />
-      <p>
-        <span>Category: {item.category_name}</span>
-        <br />
-        <span>Price: {item.price}</span>
-        <br />
-      </p>
+    // <div className="card">
+    //   <img src= className="card-img-top" alt="..." onClick={() => navigate(`/item/${item.id}`)}></img>
+    //   <div className="card-body">
+    //     <h5 className="card-title">{item.name}</h5>
+    //     <p className="card-text">{item.price}</p>
+    //     <a href="#" className="btn btn-primary">Go somewhere</a>
+    //   </div>
+    // </div>
+    <div className="w3-card-4">
+    <img src={itemImage} alt="..." onClick={() => navigate(`/item/${item.id}`)}></img>
+    <div className="w3-container w3-center">
+      <b>{item.name}</b>
+      <p>{item.price}</p>
     </div>
+  </div>
   );
 };

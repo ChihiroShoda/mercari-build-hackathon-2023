@@ -7,14 +7,20 @@ body {
   min-height: 8vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: left;
   font-size: calc(10px + 1vmin);
   color: black;
 }
 
+/* !pixel以外で */
 .MerComponent header p{
   font-size:40px;
+  padding-left:200px;
+}
+
+.container {
+  margin:150px 40px;
 }
 
 #MerTextInput {
@@ -48,6 +54,7 @@ body {
   justify-content: center;
   box-sizing: border-box;
   width: 100%;
+  padding:10px;
   margin-top: 5px;
   margin-bottom: 5px;
   overflow: hidden;
@@ -121,6 +128,29 @@ body {
   font-size: calc(10px + 1vmin);
   color: white;
 }
+
+.ItemCards{
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  column-gap: 30px;
+  row-gap:40px;
+}
+.ItemCards .w3-card-4{
+  width:100%;
+}
+.ItemCards img{
+   width: 100%;
+  height: 200px;
+  object-fit: cover;
+  margin-bottom:20px;
+}
+
+.AddItem{
+  bottom:50px;
+  right:100px;
+  position:fixed;
+}
+
 
 .ListingForm {
   width: 100%;

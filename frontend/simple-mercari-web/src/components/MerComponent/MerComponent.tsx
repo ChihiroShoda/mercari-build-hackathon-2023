@@ -20,8 +20,10 @@ export const MerComponent: React.FC<Prop> = (props) => {
   }
   return (
     <>
+    <div className="container">
       {props.children}
       {/* <Footer /> */}
+    </div>
     </>
   );
 };
