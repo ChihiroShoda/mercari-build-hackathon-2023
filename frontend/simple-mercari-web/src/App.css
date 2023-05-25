@@ -13,6 +13,10 @@ body {
   color: black;
 }
 
+.MerComponent header p{
+  font-size:40px;
+}
+
 #MerTextInput {
   display: block;
   -webkit-box-flex: 1;
