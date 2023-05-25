@@ -3,6 +3,7 @@ import { useCookies } from "react-cookie";
 import { MerComponent } from "../MerComponent";
 import { toast } from "react-toastify";
 import { fetcher } from "../../helper";
+import image from  "./fileUpload.png"
 
 interface Category {
   id: number;
@@ -15,6 +16,7 @@ type formDataType = {
   price: number;
   description: string;
   image: string | File;
+  imagePreview?: string; 
 };
 
 export const Listing: React.FC = () => {
@@ -24,6 +26,7 @@ export const Listing: React.FC = () => {
     price: 0,
     description: "",
     image: "",
+    imagePreview:image,
   };
   const [values, setValues] = useState<formDataType>(initialState);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -47,6 +50,7 @@ export const Listing: React.FC = () => {
     setValues({
       ...values,
       [event.target.name]: event.target.files![0],
+      imagePreview: URL.createObjectURL(event.target.files![0]) // 画像のプレビューを作成
     });
   };
 
@@ -68,11 +72,13 @@ export const Listing: React.FC = () => {
     })
       .then((res) => {
         sell(res.id);
+        setValues(initialState); // フォームをクリア
       })
       .catch((error: Error) => {
         toast.error(error.message);
         console.error("POST error:", error);
       });
+
   };
 
   const sell = (itemID: number) =>
@@ -117,8 +123,24 @@ export const Listing: React.FC = () => {
   return (
     <MerComponent>
       <div className="Listing">
+      <div className="w3-card-4">
+        <img src={values.imagePreview} alt="..." ></img>
+        <input
+              type="file"
+              name="image"
+              id="MerTextInput"
+              onChange={onFileChange}
+              required
+            />
+        <div className="w3-container w3-center">
+          <h1>{values.name}</h1>
+          <h2 id="price">{values.price}</h2>
+          <h5>{values.description}</h5>
+        </div>
+      </div>
         <form onSubmit={onSubmit} className="ListingForm">
           <div>
+            <h3>Name</h3>
             <input
               type="text"
               name="name"
@@ -127,6 +149,7 @@ export const Listing: React.FC = () => {
               onChange={onValueChange}
               required
             />
+            <h3>Category</h3>
             <select
               name="category_id"
               id="MerTextInput"
@@ -138,6 +161,7 @@ export const Listing: React.FC = () => {
                   return <option value={category.id}>{category.name}</option>;
                 })}
             </select>
+            <h3>Price</h3>
             <input
               type="number"
               name="price"
@@ -146,6 +170,7 @@ export const Listing: React.FC = () => {
               onChange={onValueChange}
               required
             />
+            <h3>Description</h3>
             <input
               type="text"
               name="description"
@@ -154,13 +179,13 @@ export const Listing: React.FC = () => {
               onChange={onValueChange}
               required
             />
-            <input
+            {/* <input
               type="file"
               name="image"
               id="MerTextInput"
               onChange={onFileChange}
               required
-            />
+            /> */}
             <button type="submit" id="MerButton">
               List this item
             </button>

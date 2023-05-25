@@ -116,7 +116,20 @@ body {
 
 .Listing {
   width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top:30px;
 }
+.Listing .w3-card-4{
+  margin-left: 250px;
+}
+.Listing .w3-container .w3-center h1{
+  font-weight:bold;
+}
+.Listing .w3-card-4 #price{
+  border-bottom: dashed 1px #222427;
+}
+
 
 .ItemList {
   background-color: #222427;
@@ -138,7 +151,7 @@ body {
 .ItemCards .w3-card-4{
   width:100%;
 }
-.ItemCards img{
+img{
    width: 100%;
   height: 200px;
   object-fit: cover;
