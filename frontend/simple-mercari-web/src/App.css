@@ -182,11 +182,12 @@ img{
 }
 
 .UserProfile {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: left;
+  margin:20px 100px;
+}
+
+.Balance{
+  width: 400px;
+  margin: 20px 0;
 }
 
 .SignupContainer{
@@ -203,4 +204,17 @@ img{
 }
 .SigninContainer p{
   text-align: center;
+}
+
+.Notfound{
+  margin:200px auto;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width:300px;
+}
+
+.Notfound p{
+  font-size: 2rem;
 }
