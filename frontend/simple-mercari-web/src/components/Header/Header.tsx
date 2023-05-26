@@ -10,6 +10,7 @@ export const Header: React.FC = () => {
     event.preventDefault();
     removeCookie("userID");
     removeCookie("token");
+    navigate("/");
   };
 
   return (
