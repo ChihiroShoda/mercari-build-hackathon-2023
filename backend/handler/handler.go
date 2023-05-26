@@ -498,6 +498,9 @@ func (h *Handler) Purchase(c echo.Context) error {
 	}
 
 	sellerID := item.UserID
+	if sellerID == userID {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
+	}
 
 	seller, err := h.UserRepo.GetUser(ctx, sellerID)
 	// TODO: not found handling
