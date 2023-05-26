@@ -151,7 +151,7 @@ body {
 .ItemCards .w3-card-4{
   width:100%;
 }
-img{
+.w3-card-4 img{
    width: 100%;
   height: 200px;
   object-fit: cover;
@@ -179,6 +179,25 @@ img{
   flex-direction: column;
   align-items: center;
   justify-content: left;
+}
+
+.ItemDetailContainer{
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top:50px;
+}
+
+.ItemDetailContainer img{
+  width: 400px;
+  height: 400px;
+  object-fit: cover;
+  margin: 0 50px;
+}
+
+.ItemDetailContainer .Detail{
+  width:400px;
 }
 
 .UserProfile {
