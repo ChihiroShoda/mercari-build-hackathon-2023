@@ -84,7 +84,7 @@ type sellRequest struct {
 }
 
 type addItemRequest struct {
-	Name        string `form:"name validate:"required""`
+	Name        string `form:"name" validate:"required"`
 	CategoryID  int64  `form:"category_id" validate:"required"`
 	Price       int64  `form:"price" validate:"required"`
 	Description string `form:"description" validate:"required"`
@@ -103,7 +103,7 @@ type getBalanceResponse struct {
 }
 
 type loginRequest struct {
-	UserID   int64  `json:"user_id validate:"required"`
+	UserID   int64  `json:"user_id" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
