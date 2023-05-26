@@ -55,6 +55,13 @@ type getOnSaleItemsResponse struct {
 	CategoryName string `json:"category_name"`
 }
 
+type getItemsByNameResponse struct {
+	ID           int32  `json:"id"`
+	Name         string `json:"name"`
+	Price        int64  `json:"price"`
+	CategoryName string `json:"category_name"`
+}
+
 type getItemResponse struct {
 	ID           int32             `json:"id"`
 	Name         string            `json:"name"`
@@ -405,6 +412,33 @@ func (h *Handler) GetImage(c echo.Context) error {
 	}
 
 	return c.Blob(http.StatusOK, "image/jpeg", data)
+}
+
+func (h *Handler) SearchItems(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	searchWord := c.QueryParam("name")
+	fmt.Printf("word = %s\n", searchWord)
+
+	items, err := h.ItemRepo.GetItemsByName(ctx, searchWord)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	var res []getItemsByNameResponse
+	for _, item := range items {
+		cats, err := h.ItemRepo.GetCategories(ctx)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		for _, cat := range cats {
+			if cat.ID == item.CategoryID {
+				res = append(res, getItemsByNameResponse{ID: item.ID, Name: item.Name, Price: item.Price, CategoryName: cat.Name})
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) AddBalance(c echo.Context) error {
