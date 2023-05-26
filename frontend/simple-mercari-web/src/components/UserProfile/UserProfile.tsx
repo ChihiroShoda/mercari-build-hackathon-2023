@@ -71,7 +71,10 @@ export const UserProfile: React.FC = () => {
         balance: addedbalance,
       }),
     })
-      .then((_) => window.location.reload())
+    //!balanceの部分だけ表示を更新する
+      .then((_) => {
+        fetchUserBalance();
+      })
       .catch((err) => {
         console.log(`POST error:`, err);
         toast.error(err.message);

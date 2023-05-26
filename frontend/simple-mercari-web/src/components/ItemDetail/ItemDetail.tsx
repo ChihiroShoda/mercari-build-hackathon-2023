@@ -77,7 +77,10 @@ export const ItemDetail = () => {
         user_id: Number(cookies.userID),
       }),
     })
-      .then((_) => window.location.reload())
+    //!ボタンを押したら,ページをreloadするのではなく、一部更新する
+     .then((_) => {
+      fetchItem();
+      })
       .catch((err) => {
         console.log(`POST error:`, err);
         toast.error(err.message);
