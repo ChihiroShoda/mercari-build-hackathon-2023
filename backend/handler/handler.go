@@ -414,6 +414,11 @@ func (h *Handler) AddBalance(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	
+	if req.Balance < 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Don't add minus balance")
+	}
+
 
 	userID, err := getUserID(c)
 	if err != nil {
@@ -466,6 +471,18 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	//下のupdateの前にsellerIDの判定をしないと、statusがsoldoutになってしまう
+	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
+	// TODO: not found handling
+	// http.StatusNotFound(404)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	sellerID := item.UserID
+	if sellerID == userID {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
+	}
+
 	// TODO: update only when item status is on sale
 	// http.StatusPreconditionFailed(412)
 
@@ -481,12 +498,6 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
-	// TODO: not found handling
-	// http.StatusNotFound(404)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
 
 	// TODO: if it is fail here, item status is still sold
 	// TODO: balance consistency
@@ -494,10 +505,6 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	sellerID := item.UserID
-	if sellerID == userID {
-		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
-	}
 
 	seller, err := h.UserRepo.GetUser(ctx, sellerID)
 	// TODO: not found handling
