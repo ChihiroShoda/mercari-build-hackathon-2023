@@ -37,7 +37,7 @@ export const Signup = () => {
   };
 
   return (
-    <div>
+    <div className = "SignupContainer">
       <div className="Signup">
         <label id="MerInputLabel">User Name</label>
         <input

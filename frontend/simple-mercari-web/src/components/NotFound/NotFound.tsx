@@ -5,7 +5,7 @@ export const NotFound = () => {
 
   return (
     <div>
-      <div className="Login">
+      <div className="Notfound">
         <p>Not Found</p>
         <button onClick={() => navigate("/")} id="MerButton">
           Back to SignUp/Login page
