@@ -57,6 +57,7 @@ type ItemRepository interface {
 	GetCategory(ctx context.Context, id int64) (domain.Category, error)
 	GetCategories(ctx context.Context) ([]domain.Category, error)
 	UpdateItemStatus(ctx context.Context, id int32, status domain.ItemStatus) error
+	GetFolders(ctx context.Context, id int64) ([]domain.FavoriteFolder, error)
 }
 
 type ItemDBRepository struct {
@@ -188,4 +189,25 @@ func (r *ItemDBRepository) GetCategories(ctx context.Context) ([]domain.Category
 		return nil, err
 	}
 	return cats, nil
+}
+
+func (r *ItemDBRepository) GetFolders(ctx context.Context, id int64) ([]domain.FavoriteFolder, error) {
+	rows, err := r.QueryContext(ctx, "SELECT * FROM favoriteFolders WHERE user_id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var folders []domain.FavoriteFolder
+	for rows.Next() {
+		var folder domain.FavoriteFolder
+		if err := rows.Scan(&folder.UserID, &folder.FavoriteFolderID, &folder.FavoriteFolderName); err != nil {
+			return nil, err
+		}
+		folders = append(folders, folder)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return folders, nil
 }
