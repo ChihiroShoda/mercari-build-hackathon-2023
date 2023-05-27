@@ -54,12 +54,20 @@ export const Home = () => {
 
   const itemListPage = (
     <MerComponent>
-      <div>
-        <span>
-          <p>Logined User ID: {cookies.userID}</p>
-        </span>
+        <div className="IdandSearch">
+          <span>
+            <p>Logined User ID: {cookies.userID}</p>
+          </span>
+          <div className="SearchBar">
+          <form id="form1" action="/">
+            <div className="input-container">
+              <input id="sbox" name="s" type="text" placeholder="Type keyword" />
+              <input id="sbtn" type="submit" value="Search" />
+            </div>
+          </form>
+        </div>
+       </div>
         <ItemList items={items} />
-      </div>
     </MerComponent>
   );
 
