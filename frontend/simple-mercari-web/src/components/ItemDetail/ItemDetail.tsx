@@ -127,7 +127,7 @@ export const ItemDetail = () => {
                 Purchase
               </button>
             )}
-            {errorMessage && <p className="ErrorMessage">{errorMessage}</p>}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
             </div>
           </div>
         )}

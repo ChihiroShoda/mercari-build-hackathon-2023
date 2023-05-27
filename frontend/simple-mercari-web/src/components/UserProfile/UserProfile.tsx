@@ -105,7 +105,7 @@ export const UserProfile: React.FC = () => {
             <button onClick={onBalanceSubmit} id="MerButton">
               Add balance
             </button>
-            {errorMessage && <p className="ErrorMessage">{errorMessage}</p>}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
           </div>
 
           <div className="MyItem">

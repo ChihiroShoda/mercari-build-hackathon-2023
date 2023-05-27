@@ -114,10 +114,14 @@ body {
   color: white;
 }
 
-.ErrorMessage{
-  color:red;
+/*---------------------------------
+  Error
+---------------------------------*/
+.error-message {
+  font-size: 15px;
+  color: #ff7676;
+  text-align: left;
 }
-
 
 /*---------------------------------
   Home
@@ -291,6 +295,8 @@ body {
 .SigninContainer p{
   text-align: center;
 }
+
+
 
 /*---------------------------------
 　Notfound
