@@ -30,6 +30,7 @@ export const ItemDetail = () => {
   const [item, setItem] = useState<Item>();
   const [itemImage, setItemImage] = useState<Blob>();
   const [cookies] = useCookies(["token", "userID"]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const fetchItem = () => {
     fetcher<Item>(`/items/${params.id}`, {
@@ -84,6 +85,8 @@ export const ItemDetail = () => {
       .catch((err) => {
         console.log(`POST error:`, err);
         toast.error(err.message);
+        //!ここbackendからのmessageを表示させたい
+        setErrorMessage("This item is listed by you!");
       });
   };
 
@@ -124,6 +127,7 @@ export const ItemDetail = () => {
                 Purchase
               </button>
             )}
+            {errorMessage && <p className="ErrorMessage">{errorMessage}</p>}
             </div>
           </div>
         )}

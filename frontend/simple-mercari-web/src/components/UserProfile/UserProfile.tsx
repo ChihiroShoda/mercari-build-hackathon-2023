@@ -18,6 +18,7 @@ export const UserProfile: React.FC = () => {
   const [balance, setBalance] = useState<number>();
   const [addedbalance, setAddedBalance] = useState<number>();
   const [cookies] = useCookies(["token"]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const params = useParams();
 
   const fetchItems = () => {
@@ -74,10 +75,12 @@ export const UserProfile: React.FC = () => {
     //!balanceの部分だけ表示を更新する
       .then((_) => {
         fetchUserBalance();
+        setErrorMessage("");
       })
       .catch((err) => {
         console.log(`POST error:`, err);
         toast.error(err.message);
+        setErrorMessage("Don't add minus balance");
       });
   };
 
@@ -102,6 +105,7 @@ export const UserProfile: React.FC = () => {
             <button onClick={onBalanceSubmit} id="MerButton">
               Add balance
             </button>
+            {errorMessage && <p className="ErrorMessage">{errorMessage}</p>}
           </div>
 
           <div className="MyItem">
