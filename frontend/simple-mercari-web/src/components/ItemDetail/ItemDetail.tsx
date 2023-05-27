@@ -99,25 +99,22 @@ export const ItemDetail = () => {
       <MerComponent condition={() => item !== undefined}>
         {item && itemImage && (
           <div className="ItemDetailContainer">
-            <img
-              height={480}
-              width={480}
-              src={URL.createObjectURL(itemImage)}
-              alt="item"
-              onClick={() => navigate(`/item/${item.id}`)}
-            />
+            <div className="ItemNameandImage">
+            <h1> {item.name}</h1>
+              <img
+                height={480}
+                width={480}
+                src={URL.createObjectURL(itemImage)}
+                alt="item"
+                onClick={() => navigate(`/item/${item.id}`)}
+              />
+            </div>
             <div className="Detail">
-            <p>
-              <span>Item Name: {item.name}</span>
-              <br />
-              <span>Price: {item.price}</span>
-              <br />
-              <span>UserID: {item.user_id}</span>
-              <br />
-              <span>Category: {item.category_name}</span>
-              <br />
-              <span>Description: {item.description}</span>
-            </p>
+               <h1>￥{item.price}</h1>
+              <h3>Category</h3>
+               <p> {item.category_name}</p>
+              <h3>Description</h3>
+               <p> {item.description}</p>
             {item.status == ItemStatus.ItemStatusSoldOut ? (
               <button disabled={true} onClick={onSubmit} id="MerDisableButton">
                 SoldOut
