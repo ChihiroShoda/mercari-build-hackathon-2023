@@ -10,11 +10,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/db"
 	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/domain"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -32,8 +33,8 @@ type InitializeResponse struct {
 }
 
 type registerRequest struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
+	Name     string `json:"name" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type registerResponse struct {
@@ -49,6 +50,13 @@ type getUserItemsResponse struct {
 }
 
 type getOnSaleItemsResponse struct {
+	ID           int32  `json:"id"`
+	Name         string `json:"name"`
+	Price        int64  `json:"price"`
+	CategoryName string `json:"category_name"`
+}
+
+type getItemsByNameResponse struct {
 	ID           int32  `json:"id"`
 	Name         string `json:"name"`
 	Price        int64  `json:"price"`
@@ -76,10 +84,10 @@ type sellRequest struct {
 }
 
 type addItemRequest struct {
-	Name        string `form:"name"`
-	CategoryID  int64  `form:"category_id"`
-	Price       int64  `form:"price"`
-	Description string `form:"description"`
+	Name        string `form:"name" validate:"required"`
+	CategoryID  int64  `form:"category_id" validate:"required"`
+	Price       int64  `form:"price" validate:"required"`
+	Description string `form:"description" validate:"required"`
 }
 
 type addItemResponse struct {
@@ -95,8 +103,8 @@ type getBalanceResponse struct {
 }
 
 type loginRequest struct {
-	UserID   int64  `json:"user_id"`
-	Password string `json:"password"`
+	UserID   int64  `json:"user_id" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type loginResponse struct {
@@ -137,11 +145,14 @@ func (h *Handler) AccessLog(c echo.Context) error {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	// TODO: validation
-	// http.StatusBadRequest(400)
 	req := new(registerRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "name and password are both required")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -159,11 +170,15 @@ func (h *Handler) Register(c echo.Context) error {
 
 func (h *Handler) Login(c echo.Context) error {
 	ctx := c.Request().Context()
-	// TODO: validation
-	// http.StatusBadRequest(400)
+
 	req := new(loginRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "id and password are both required")
 	}
 
 	user, err := h.UserRepo.GetUser(ctx, req.UserID)
@@ -201,13 +216,16 @@ func (h *Handler) Login(c echo.Context) error {
 }
 
 func (h *Handler) AddItem(c echo.Context) error {
-	// TODO: validation
-	// http.StatusBadRequest(400)
 	ctx := c.Request().Context()
 
 	req := new(addItemRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "all columns are required")
 	}
 
 	userID, err := getUserID(c)
@@ -407,6 +425,33 @@ func (h *Handler) GetImage(c echo.Context) error {
 	return c.Blob(http.StatusOK, "image/jpeg", data)
 }
 
+func (h *Handler) SearchItems(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	searchWord := c.QueryParam("name")
+	fmt.Printf("word = %s\n", searchWord)
+
+	items, err := h.ItemRepo.GetItemsByName(ctx, searchWord)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	var res []getItemsByNameResponse
+	for _, item := range items {
+		cats, err := h.ItemRepo.GetCategories(ctx)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		for _, cat := range cats {
+			if cat.ID == item.CategoryID {
+				res = append(res, getItemsByNameResponse{ID: item.ID, Name: item.Name, Price: item.Price, CategoryName: cat.Name})
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
 func (h *Handler) AddBalance(c echo.Context) error {
 	ctx := c.Request().Context()
 
@@ -419,6 +464,10 @@ func (h *Handler) AddBalance(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Don't add minus balance")
 	}
 
+
+	if req.Balance < 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Don't add minus balance")
+	}
 
 	userID, err := getUserID(c)
 	if err != nil {
@@ -499,7 +548,10 @@ func (h *Handler) Purchase(c echo.Context) error {
 	}
 
 
-	// TODO: if it is fail here, item status is still sold
+	if user.Balance-item.Price < 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
+	}
+
 	// TODO: balance consistency
 	if err := h.UserRepo.UpdateBalance(ctx, userID, user.Balance-item.Price); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
