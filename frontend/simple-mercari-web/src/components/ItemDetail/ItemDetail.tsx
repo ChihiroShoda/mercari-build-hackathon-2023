@@ -30,7 +30,6 @@ export const ItemDetail = () => {
   const [item, setItem] = useState<Item>();
   const [itemImage, setItemImage] = useState<Blob>();
   const [cookies] = useCookies(["token", "userID"]);
-  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const fetchItem = () => {
     fetcher<Item>(`/items/${params.id}`, {
@@ -78,16 +77,24 @@ export const ItemDetail = () => {
         user_id: Number(cookies.userID),
       }),
     })
+
     //!ボタンを押したら,ページをreloadするのではなく、一部更新する
      .then((_) => {
-      fetchItem();
-      })
-      .catch((err) => {
-        console.log(`POST error:`, err);
-        toast.error(err.message);
-        //!ここbackendからのmessageを表示させたい
-        setErrorMessage("This item is listed by you!");
-      });
+        // 正常なレスポンス
+        fetchItem();
+    })
+    .catch((err) => {
+      if (err instanceof Response) {
+        err.json().then((data) => {
+          console.log(`POST error:`, err);
+          toast.error(data.message);
+        });
+      }
+      // } else {
+      //   console.log(`POST error:`, err);
+      //   toast.error(err.message);
+      // }
+    });
   };
 
   useEffect(() => {
@@ -124,7 +131,6 @@ export const ItemDetail = () => {
                 Purchase
               </button>
             )}
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
             </div>
           </div>
         )}
