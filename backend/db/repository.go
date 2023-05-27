@@ -81,7 +81,7 @@ func (r *ItemDBRepository) AddItem(ctx context.Context, item domain.Item) (domai
 }
 
 func (r *ItemDBRepository) UpdateItem(ctx context.Context, item domain.Item) (domain.Item, error) {
-	if _, err := r.ExecContext(ctx, "UPDATE items SET name = ?, price = ?, description = ?, category_id = ?, image = ?) WHERE id = ?", item.Name, item.Price, item.Description, item.CategoryID, item.Image, item.ID); err != nil {
+	if _, err := r.ExecContext(ctx, "UPDATE items SET name = ?, price = ?, description = ?, category_id = ?, image = ? WHERE id = ?", item.Name, item.Price, item.Description, item.CategoryID, item.Image, item.ID); err != nil {
 		return domain.Item{}, err
 	}
 	return domain.Item{ID: item.ID}, nil
