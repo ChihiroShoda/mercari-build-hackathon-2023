@@ -36,14 +36,6 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   }, [item]);
 
   return (
-    // <div className="card">
-    //   <img src= className="card-img-top" alt="..." onClick={() => navigate(`/item/${item.id}`)}></img>
-    //   <div className="card-body">
-    //     <h5 className="card-title">{item.name}</h5>
-    //     <p className="card-text">{item.price}</p>
-    //     <a href="#" className="btn btn-primary">Go somewhere</a>
-    //   </div>
-    // </div>
     <div className="w3-card-4">
     <img src={itemImage} alt="..." onClick={() => navigate(`/item/${item.id}`)}></img>
     <div className="w3-container w3-center">
