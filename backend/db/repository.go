@@ -56,6 +56,7 @@ type ItemRepository interface {
 	GetItemsByName(ctx context.Context, searchWord string) ([]domain.Item, error)
 	GetCategory(ctx context.Context, id int64) (domain.Category, error)
 	GetCategories(ctx context.Context) ([]domain.Category, error)
+	UpdateItem(ctx context.Context, item domain.Item) (domain.Item, error)
 	UpdateItemStatus(ctx context.Context, id int32, status domain.ItemStatus) error
 }
 
@@ -77,6 +78,13 @@ func (r *ItemDBRepository) AddItem(ctx context.Context, item domain.Item) (domai
 
 	var res domain.Item
 	return res, row.Scan(&res.ID, &res.Name, &res.Price, &res.Description, &res.CategoryID, &res.UserID, &res.Image, &res.Status, &res.CreatedAt, &res.UpdatedAt)
+}
+
+func (r *ItemDBRepository) UpdateItem(ctx context.Context, item domain.Item) (domain.Item, error) {
+	if _, err := r.ExecContext(ctx, "UPDATE items SET name = ?, price = ?, description = ?, category_id = ?, image = ? WHERE id = ?", item.Name, item.Price, item.Description, item.CategoryID, item.Image, item.ID); err != nil {
+		return domain.Item{}, err
+	}
+	return domain.Item{ID: item.ID}, nil
 }
 
 func (r *ItemDBRepository) GetItem(ctx context.Context, id int32) (domain.Item, error) {
@@ -135,7 +143,7 @@ func (r *ItemDBRepository) GetItemsByUserID(ctx context.Context, userID int64) (
 }
 
 func (r *ItemDBRepository) GetItemsByName(ctx context.Context, searchWord string) ([]domain.Item, error) {
-	rows, err := r.QueryContext(ctx, "SELECT * FROM items WHERE name LIKE ?", "%" + searchWord + "%")
+	rows, err := r.QueryContext(ctx, "SELECT * FROM items WHERE name LIKE ?", "%"+searchWord+"%")
 	if err != nil {
 		return nil, err
 	}
