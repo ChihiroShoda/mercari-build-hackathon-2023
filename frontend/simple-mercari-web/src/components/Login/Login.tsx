@@ -8,10 +8,15 @@ export const Login = () => {
   const [userID, setUserID] = useState<number>();
   const [password, setPassword] = useState<string>();
   const [_, setCookie] = useCookies(["userID", "token"]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const navigate = useNavigate();
 
   const onSubmit = (_: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (!userID || !password) {
+      setErrorMessage("Please fill out all fields");
+      return;
+    }
     fetcher<{ id: number; name: string; token: string }>(`/login`, {
       method: "POST",
       headers: {
@@ -33,6 +38,7 @@ export const Login = () => {
       .catch((err) => {
         console.log(`POST error:`, err);
         toast.error(err.message);
+        setErrorMessage("unauthorized");
       });
   };
 
@@ -60,6 +66,7 @@ export const Login = () => {
             setPassword(e.target.value);
           }}
         />
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
         <button onClick={onSubmit} id="MerButton">
           Login
         </button>
