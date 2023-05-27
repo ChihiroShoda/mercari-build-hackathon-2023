@@ -135,7 +135,7 @@ func (r *ItemDBRepository) GetItemsByUserID(ctx context.Context, userID int64) (
 }
 
 func (r *ItemDBRepository) GetItemsByName(ctx context.Context, searchWord string) ([]domain.Item, error) {
-	rows, err := r.QueryContext(ctx, "SELECT * FROM items WHERE name LIKE ?", "%" + searchWord + "%")
+	rows, err := r.QueryContext(ctx, "SELECT * FROM items WHERE name LIKE ? AND status = ?", "%" + searchWord + "%",domain.ItemStatusOnSale)
 	if err != nil {
 		return nil, err
 	}
