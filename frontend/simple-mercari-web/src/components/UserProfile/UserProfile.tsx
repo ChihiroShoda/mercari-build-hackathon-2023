@@ -82,7 +82,7 @@ export const UserProfile: React.FC = () => {
     <MerComponent>
       <div className="UserProfile">
         <div>
-          <div>
+          <div className="Balance">
             <h2>
               <span>Balance: {balance}</span>
             </h2>
@@ -101,7 +101,7 @@ export const UserProfile: React.FC = () => {
             </button>
           </div>
 
-          <div>
+          <div className="MyItem">
             <h2>Item List</h2>
             {<ItemList items={items} />}
           </div>

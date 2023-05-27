@@ -41,15 +41,15 @@ export const Home = () => {
   }, []);
 
   const signUpAndSignInPage = (
-    <>
+    <div className="SigninContainer">
       <div>
         <Signup />
       </div>
-      or
+      <p>or</p>
       <div>
         <Login />
       </div>
-    </>
+    </div>
   );
 
   const itemListPage = (

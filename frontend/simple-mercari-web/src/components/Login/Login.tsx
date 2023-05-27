@@ -37,7 +37,7 @@ export const Login = () => {
   };
 
   return (
-    <div>
+    <div className="LoginContainer">
       <div className="Login">
         <label id="MerInputLabel">User ID</label>
         <input
