@@ -144,14 +144,14 @@ body {
   outline:0;/*クリック時の青い枠線消す*/	
   height:50px;/*検索ボックスの高さ*/	
   padding:0 10px;/*テキスト位置調整*/	 
-  border-radius:2px 0 0 2px;/*検索ボックスの角を丸める*/		
+  border-radius:4px;/*検索ボックスの角を丸める*/		
   background:#eee;/*検索ボックスの背景カラー*/		
   }
   /*検索ボタン*/
   #sbtn{
   width:70px;/*検索ボタンの横幅*/ 
   height:50px;/*検索ボタンの縦幅*/ 
-  border-radius:0 2px 2px 0;/*検索ボタンの角を丸める*/ 
+  border-radius:4px;/*検索ボタンの角を丸める*/ 
   background:#4DC9FF;/*検索ボタンの背景カラー*/ 
   border:none;/*検索ボタンの枠線を消す*/ 
   color:#fff;/*検索ボタンのテキストカラー*/ 
