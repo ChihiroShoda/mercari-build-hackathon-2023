@@ -135,6 +135,13 @@ type addItemToFavoriteRequest struct {
 	FolderID int32 `json:"folder_id"`
 }
 
+type getFavoriteItemsResponse struct {
+	ID           int32  `json:"id"`
+	Name         string `json:"name"`
+	Price        int64  `json:"price"`
+	CategoryName string `json:"category_name"`
+}
+
 func GetSecret() string {
 	if secret := os.Getenv("SECRET"); secret != "" {
 		return secret
@@ -714,4 +721,39 @@ func (h *Handler) AddItemToFavoriteFolder(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, "successful")
+}
+
+func (h *Handler) GetFavoriteItems(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	folderID, err := strconv.ParseInt(c.Param("folderID"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid folderID type")
+	}
+
+	itemIDs, err := h.ItemRepo.GetFavoriteItems(ctx, folderID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	var res [] getFavoriteItemsResponse
+
+	cats, err := h.ItemRepo.GetCategories(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	for _, itemID := range itemIDs {
+		item, err := h.ItemRepo.GetItem(ctx, itemID.ItemID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		for _, cat := range cats {
+			if cat.ID == item.CategoryID {
+				res = append(res, getFavoriteItemsResponse{ID: item.ID, Name: item.Name, Price: item.Price, CategoryName: cat.Name})
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
