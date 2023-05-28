@@ -64,7 +64,7 @@ Sample code for calling some endpoints after running server
 $ curl -X POST 'http://127.0.0.1:9000/register' -d '{"name": "momom", "password": "password"}'  -H 'Content-Type: application/json'
 # Login (get login token)
 # {"id":11,"name":"momom","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwiZXhwIjoxNjg0NTgxNjU3fQ.7YGvgOsKI1EIr8a9yw0Ny6GRmmUJjrAkjjypdpj74qw"}
-$ curl -i -X POST 'http://127.0.0.1:9000/login' -d '{"user_id": 1, "password": "password"}'  -H 'Content-Type: application/json'
+$ curl -i -X POST 'http://127.0.0.1:9000/login' -d '{"user_id": 11, "password": "password"}'  -H 'Content-Type: application/json'
 # Add item
 # Please put image.jpg on backend folder to call this endpoint 
 # {"id":21}
@@ -101,7 +101,13 @@ curl -X POST 'http://127.0.0.1:9000/purchase/1' -H "Authorization: Bearer <ロ�
 curl -X GET 'http://127.0.0.1:9000/favorite' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>"
 
 # Add an item to a favorite folder
-curl -X POST 'http://127.0.0.1:9000/favorite' -d '{"item_id": 3, "folder_id": 2}' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
+curl -X POST 'http://127.0.0.1:9000/favorite' -d '{"item_id": 2, "folder_id": 1}' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
+
+# Get faborite items
+curl -X GET 'http://127.0.0.1:9000/favorite/1' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>"
+
+# Remove a favorite item
+curl -X POST 'http://127.0.0.1:9000/favorite/delete' -d '{"item_id": 4, "folder_id": 1}' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
 ```
 
 ###  Structure
