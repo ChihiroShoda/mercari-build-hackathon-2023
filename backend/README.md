@@ -95,6 +95,12 @@ curl -X POST 'http://127.0.0.1:9000/sell' -d '{"user_id": 1, "item_id": 1}' -H "
 # Purchase
 # "successful"
 curl -X POST 'http://127.0.0.1:9000/purchase/1' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
+
+# Get my favorite folders
+curl -X GET 'http://127.0.0.1:9000/favorite' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>"
+
+# Add an item to a favorite folder
+curl -X POST 'http://127.0.0.1:9000/favorite' -d '{"item_id": 3, "folder_id": 2}' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
 ```
 
 ###  Structure
