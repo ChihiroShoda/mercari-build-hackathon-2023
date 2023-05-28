@@ -25,3 +25,9 @@ type Category struct {
 	ID   int64
 	Name string
 }
+
+type FavoriteFolder struct {
+	UserID   int64
+	FavoriteFolderID   int64
+	FavoriteFolderName string
+}
