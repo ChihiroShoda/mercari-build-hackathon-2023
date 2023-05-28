@@ -393,8 +393,12 @@ func (h *Handler) Sell(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item does not belong to you.")
 	}
 
-	// TODO: only update when status is initial
+	// DONE: only update when status is initial
 	// http.StatusPreconditionFailed(412)
+	if item.Status != domain.ItemStatusInitial {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "Item status must be initial.")
+	}
+
 	if err := h.ItemRepo.UpdateItemStatus(ctx, item.ID, domain.ItemStatusOnSale); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
