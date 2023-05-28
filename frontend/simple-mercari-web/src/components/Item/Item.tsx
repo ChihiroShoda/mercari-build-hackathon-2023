@@ -38,6 +38,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   const [values, setValues] = useState<formDataType>(initialState);
   const [selectedRadioId, setSelectedRadioId] = useState<number | null>(null);
 
+
   async function getItemImage(itemId: number): Promise<Blob> {
     return await fetcherBlob(`/items/${itemId}/image`, {
       method: "GET",
@@ -62,6 +63,27 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
         toast.error(err.message);
       });
     }
+
+    const deleteFavoriteItem = (itemID: number) => {
+      fetcher(`/favorite/delete`, {
+        method: "POST",
+        body: JSON.stringify({
+          item_id: itemID,
+          folder_id: values.folder,
+        }),
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      })
+        .then((res) => {
+          console.log("DELETE success:", res);
+          toast.success("Deleted from favorite");
+        })
+        .catch((err) => {
+          console.log(`DELETE error:`, err);
+          toast.error(err.message);
+        });
+    }
     
     useEffect(() => {
       async function fetchData() {
@@ -74,12 +96,16 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     }, [item]);
     
   const onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setValues({
+      ...values,
+      itemID: item.id,
+    });
     const target =  event.currentTarget.parentElement;
     const icon = target?.querySelector("i");
     if(icon?.classList.contains("bi-heart-fill")){
       icon?.classList.remove("bi-heart-fill");
       icon?.classList.toggle("bi-heart");
-      //! お気に入りフォルダから消す処理
+      deleteFavoriteItem(item.id);
     }else{
       icon?.classList.remove("bi-heart");
       icon?.classList.toggle("bi-heart-fill");
@@ -104,7 +130,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   const onValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
       ...values,
-      [event.target.name]: event.target.value,
+      newFolder: event.target.value,
     });
   };
 
@@ -125,14 +151,15 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   const onRadioChange = (event: React.ChangeEvent<HTMLInputElement>, folderId: number) => {
     setValues({
       ...values,
-      [event.target.name]: event.target.value,
+      existingFolder: event.target.value,
       folder: folderId,
     });
   };
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-   
+    console.log(values)
+
     if (!values.existingFolder && !values.newFolder || values.existingFolder && values.newFolder) {
       toast.error("Please select OR enter a folder name");
       return;
@@ -181,7 +208,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
       </header>
       <div className="w3-container" id="select-folder">
       <form onSubmit={onSubmit}>
-        {favoriteFolders.map((folder) => (
+        {favoriteFolders && favoriteFolders.map((folder) => (
           <p key={folder.FavoriteFolderID}>
             <input
               className="w3-radio"

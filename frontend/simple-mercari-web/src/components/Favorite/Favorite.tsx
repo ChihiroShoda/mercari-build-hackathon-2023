@@ -5,7 +5,6 @@ import { MerComponent } from "../MerComponent";
 import { toast } from "react-toastify";
 import { ItemList } from "../ItemList";
 import { fetcher } from "../../helper";
-import { get } from "http";
 
 interface Item {
   id: number;
@@ -20,15 +19,15 @@ interface FavoriteFolder {
   FavoriteFolderName: string;
 }
 
-
 export const Favorite: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [favoriteFolders, setFavoriteFolders] = useState<FavoriteFolder[]>([]);
   const [cookies] = useCookies(["token"]);
-  const params = useParams();
+  const params = useParams<{ id?: string }>();
+  const [selectedFolderId, setSelectedFolderId] = useState<string | undefined>(params.id);
 
-  const fetchItems = () => {
-    fetcher<Item[]>(`/users/${params.id}/items`, {
+  const fetchItems = (folderId: string | undefined) => {
+    fetcher<Item[]>(`/favorite/${folderId ?? ""}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -36,14 +35,17 @@ export const Favorite: React.FC = () => {
         Authorization: `Bearer ${cookies.token}`,
       },
     })
-      .then((items) => setItems(items))
+      .then((items) => {
+        console.log(items)
+        setItems(items)
+      })
       .catch((err) => {
         console.log(`GET error:`, err);
         toast.error(err.message);
       });
   };
 
-  const getFavoriteFolders = ()=> {
+  const getFavoriteFolders = () => {
     fetcher<FavoriteFolder[]>(`/favorite`, {
       method: "GET",
       headers: {
@@ -55,32 +57,47 @@ export const Favorite: React.FC = () => {
         console.log(`GET error:`, err);
         toast.error(err.message);
       });
-    }
-    
-  useEffect(() => {
-    fetchItems();
-    getFavoriteFolders();
-  }, []);
+  };
 
-  
+  const onFolderClick = (folderId: number | null) => {
+    setSelectedFolderId(folderId?.toString());
+    fetchItems(folderId?.toString());
+  };
+
+  useEffect(() => {
+    fetchItems(selectedFolderId);
+    getFavoriteFolders();
+  }, [selectedFolderId]);
+
   return (
     <MerComponent>
       <div className="Favorite">
         <h1>Favorite Items</h1>
-        <div className="w3-sidebar w3-bar-block" >
-        <a href="/favorite" className="w3-bar-item w3-button">All</a>
-          {favoriteFolders.map((folder) => (
-            <a key={folder.FavoriteFolderID}
-              href = "/favorite/{folder.FavoriteFolderID}"
-              className="w3-bar-item w3-button"
-            > 
-            {folder.FavoriteFolderName}
-            </a>
+        <div className="w3-sidebar w3-bar-block">
+          <a href="/favorite" className="w3-bar-item w3-button">
+            All
+          </a>
+          {favoriteFolders && favoriteFolders.map((folder) => (
+            <a
+                key={folder.FavoriteFolderID}
+                href={`/favorite/${folder.FavoriteFolderID}`}
+                className="w3-bar-item w3-button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  onFolderClick(folder.FavoriteFolderID);
+                }}
+              >
+                {folder.FavoriteFolderName}
+              </a>
           ))}
         </div>
         <div className="MyItem">
-            <h2>All</h2>
-            {<ItemList items={items} />}
+          {selectedFolderId && (
+            <h2>
+              {favoriteFolders.find((folder) => folder.FavoriteFolderID === Number(selectedFolderId))?.FavoriteFolderName}
+            </h2>
+          )}
+          <ItemList items={items} />
         </div>
       </div>
     </MerComponent>
