@@ -131,7 +131,7 @@ type Handler struct {
 }
 
 type addItemToFavoriteRequest struct {
-	ItemID	 int32 `json:"item_id"`
+	ItemID   int32 `json:"item_id"`
 	FolderID int32 `json:"folder_id"`
 }
 
@@ -143,7 +143,7 @@ type getFavoriteItemsResponse struct {
 }
 
 type removeFavoriteItemRequest struct {
-	ItemID	 int32 `json:"item_id"`
+	ItemID   int32 `json:"item_id"`
 	FolderID int32 `json:"folder_id"`
 }
 
@@ -304,13 +304,18 @@ func (h *Handler) AddItem(c echo.Context) error {
 }
 
 func (h *Handler) UpdateItem(c echo.Context) error {
-	// TODO: validation
+	// DONE: validation
 	// http.StatusBadRequest(400)
 	ctx := c.Request().Context()
 
 	req := new(updateItemRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "all columns are required")
 	}
 
 	userID, err := getUserID(c)
@@ -394,10 +399,23 @@ func (h *Handler) Sell(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	// TODO: check req.UserID and item.UserID
+	// DONE: check req.UserID and item.UserID
 	// http.StatusPreconditionFailed(412)
-	// TODO: only update when status is initial
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	if item.UserID != userID {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item does not belong to you.")
+	}
+
+	// DONE: only update when status is initial
 	// http.StatusPreconditionFailed(412)
+	if item.Status != domain.ItemStatusInitial {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "Item status must be initial.")
+	}
+
 	if err := h.ItemRepo.UpdateItemStatus(ctx, item.ID, domain.ItemStatusOnSale); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -563,7 +581,7 @@ func (h *Handler) AddBalance(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	
+
 	if req.Balance < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Don't add minus balance")
 	}
@@ -631,6 +649,13 @@ func (h *Handler) Purchase(c echo.Context) error {
 	if sellerID == userID {
 		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
 	}
+
+	// DONE: update only when item status is on sale
+	// http.StatusPreconditionFailed(412)
+	if item.Status != domain.ItemStatusOnSale {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is not on sale.")
+	}
+
 	/*Balanceの判定*/
 	user, err := h.UserRepo.GetUser(ctx, userID)
 	// TODO: not found handling
@@ -641,23 +666,16 @@ func (h *Handler) Purchase(c echo.Context) error {
 	if user.Balance-item.Price < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
 	}
-	
-	// TODO: update only when item status is on sale
-	// http.StatusPreconditionFailed(412)
 
 	// オーバーフローしていると。ここのint32(itemID)がバグって正常に処理ができないはず
 	if err := h.ItemRepo.UpdateItemStatus(ctx, int32(itemID), domain.ItemStatusSoldOut); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-
-
-
 	// TODO: balance consistency
 	if err := h.UserRepo.UpdateBalance(ctx, userID, user.Balance-item.Price); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-
 
 	seller, err := h.UserRepo.GetUser(ctx, sellerID)
 	// TODO: not found handling
@@ -741,7 +759,7 @@ func (h *Handler) GetFavoriteItems(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	var res [] getFavoriteItemsResponse
+	var res []getFavoriteItemsResponse
 
 	cats, err := h.ItemRepo.GetCategories(ctx)
 	if err != nil {
@@ -773,7 +791,42 @@ func (h *Handler) RemoveFavoriteItem(c echo.Context) error {
 
 	if err := h.ItemRepo.RemoveFavoriteItem(ctx, req.ItemID, req.FolderID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "cannot delete the favorite item")
-	}	
+	}
 
 	return c.JSON(http.StatusOK, "successful")
+}
+
+func (h *Handler) CheckFavoriteItem(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	folders, err := h.ItemRepo.GetFolders(ctx, userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	itemID, err := strconv.ParseInt(c.Param("itemID"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid itemID type")
+	}
+
+	var result = false
+
+	for _, folder := range folders {
+		items, err := h.ItemRepo.GetFavoriteItems(ctx, folder.FavoriteFolderID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		for _, item := range items {
+			if itemID == int64(item.ItemID) {
+				result = true
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
