@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { fetcherBlob } from "../../helper";
+import { toast } from "react-toastify";
+import { fetcher, fetcherBlob } from "../../helper";
 
 interface Item {
   id: number;
@@ -10,10 +11,17 @@ interface Item {
   category_name: string;
 }
 
+interface FavoriteFolder {
+  UserID: number;
+  FavoriteFolderID: number;
+  FavoriteFolderName: string;
+}
+
 export const Item: React.FC<{ item: Item }> = ({ item }) => {
   const navigate = useNavigate();
   const [itemImage, setItemImage] = useState<string>("");
   const [cookies] = useCookies(["token"]);
+  const [favoriteFolders, setFavoriteFolders] = useState<FavoriteFolder[]>([]);
 
   async function getItemImage(itemId: number): Promise<Blob> {
     return await fetcherBlob(`/items/${itemId}/image`, {
@@ -26,15 +34,31 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     });
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      const image = await getItemImage(item.id);
-      setItemImage(URL.createObjectURL(image));
+  
+  const getFavoriteFolders = ()=> {
+    fetcher<FavoriteFolder[]>(`/favorite`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    })
+      .then((data) => setFavoriteFolders(data))
+      .catch((err) => {
+        console.log(`GET error:`, err);
+        toast.error(err.message);
+      });
     }
-
-    fetchData();
-  }, [item]);
-
+    
+    useEffect(() => {
+      async function fetchData() {
+        const image = await getItemImage(item.id);
+        setItemImage(URL.createObjectURL(image));
+      }
+  
+      fetchData();
+      getFavoriteFolders();
+    }, [item]);
+    
   const onSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const target =  event.currentTarget.parentElement;
     const icon = target?.querySelector("i");
@@ -73,14 +97,18 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
       </header>
       <div className="w3-container" id="select-folder">
       <form>
-        <p>
-        <input className="w3-radio" type="radio" name="gender" value="male" checked/>
-        <label>Male</label>
-        </p>
-        <p>
-        <input className="w3-radio" type="radio" name="gender" value="female"/>
-        <label>Female</label>
-        </p>
+        {favoriteFolders.map((folder) => (
+          <p key={folder.FavoriteFolderID}>
+            <input
+              className="w3-radio"
+              type="radio"
+              name="folder"
+              value={folder.FavoriteFolderName}
+              checked={folder.FavoriteFolderName === "food"}
+            />
+            <label>{folder.FavoriteFolderName}</label>
+          </p>
+        ))}
         <input
               type="text"
               name="name"
