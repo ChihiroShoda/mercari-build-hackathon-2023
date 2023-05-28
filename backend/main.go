@@ -101,6 +101,7 @@ func run(ctx context.Context) int {
 	l.POST("/favorite", h.AddItemToFavoriteFolder)
 	l.GET("/favorite/:folderID", h.GetFavoriteItems)
 	l.POST("/favorite/delete", h.RemoveFavoriteItem)
+	l.POST("/favorite/new", h.AddNewFavoriteFolder)
 
 	// Start server
 	go func() {
