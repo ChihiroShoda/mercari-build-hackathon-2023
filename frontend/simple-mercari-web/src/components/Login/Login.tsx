@@ -12,6 +12,11 @@ export const Login = () => {
   const navigate = useNavigate();
 
   const onSubmit = (_: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (!userID || !password) {
+      const errorMessage = "Please fill out all fields";
+      toast.error(errorMessage);
+      return;
+    }
     fetcher<{ id: number; name: string; token: string }>(`/login`, {
       method: "POST",
       headers: {
@@ -32,7 +37,7 @@ export const Login = () => {
       })
       .catch((err) => {
         console.log(`POST error:`, err);
-        toast.error(err.message);
+        toast.error("Invalid user ID or password");
       });
   };
 
