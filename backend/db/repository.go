@@ -93,7 +93,6 @@ func (r *ItemDBRepository) UpdateItem(ctx context.Context, item domain.Item) (do
 
 func (r *ItemDBRepository) GetItem(ctx context.Context, id int32) (domain.Item, error) {
 	row := r.QueryRowContext(ctx, "SELECT * FROM items WHERE id = ?", id)
-
 	var item domain.Item
 	return item, row.Scan(&item.ID, &item.Name, &item.Price, &item.Description, &item.CategoryID, &item.UserID, &item.Image, &item.Status, &item.CreatedAt, &item.UpdatedAt)
 }
@@ -147,7 +146,7 @@ func (r *ItemDBRepository) GetItemsByUserID(ctx context.Context, userID int64) (
 }
 
 func (r *ItemDBRepository) GetItemsByName(ctx context.Context, searchWord string) ([]domain.Item, error) {
-	rows, err := r.QueryContext(ctx, "SELECT * FROM items WHERE name LIKE ? AND status = ? ORDER BY updated_at desc", "%" + searchWord + "%",domain.ItemStatusOnSale)
+	rows, err := r.QueryContext(ctx, "SELECT * FROM items WHERE name LIKE ? AND status = ? ORDER BY updated_at desc", "%"+searchWord+"%", domain.ItemStatusOnSale)
 
 	if err != nil {
 		return nil, err
