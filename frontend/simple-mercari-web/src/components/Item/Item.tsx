@@ -18,18 +18,25 @@ interface FavoriteFolder {
 }
 
 type formDataType = {
+  itemID: number;
   folder: number;
+  existingFolder?: string;
+  newFolder?: string;
 };
 
 export const Item: React.FC<{ item: Item }> = ({ item }) => {
   const initialState ={
     folder:0,
+    itemID:0,
+    existingFolder: "",
+    newFolder: "",
   }
   const navigate = useNavigate();
   const [itemImage, setItemImage] = useState<string>("");
   const [cookies] = useCookies(["token"]);
   const [favoriteFolders, setFavoriteFolders] = useState<FavoriteFolder[]>([]);
   const [values, setValues] = useState<formDataType>(initialState);
+  const [selectedRadioId, setSelectedRadioId] = useState<number | null>(null);
 
   async function getItemImage(itemId: number): Promise<Blob> {
     return await fetcherBlob(`/items/${itemId}/image`, {
@@ -72,6 +79,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     if(icon?.classList.contains("bi-heart-fill")){
       icon?.classList.remove("bi-heart-fill");
       icon?.classList.toggle("bi-heart");
+      //! お気に入りフォルダから消す処理
     }else{
       icon?.classList.remove("bi-heart");
       icon?.classList.toggle("bi-heart-fill");
@@ -81,23 +89,81 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
       }
     }
   }; 
-
   const closeModal = () => {
+    if (!values.existingFolder && !values.newFolder) {
+      const icon = document.querySelector(".bi-heart-fill");
+      icon?.classList.remove("bi-heart-fill");
+      icon?.classList.toggle("bi-heart");
+    }
     const modal = document.getElementById("id01");
     if (modal) {
       modal.style.display = "none";
     }
   };
 
-  const onRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
       ...values,
       [event.target.name]: event.target.value,
     });
   };
-  
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 
+  const onRadioClick = (event: React.MouseEvent<HTMLInputElement>, folderId: number) => {
+    if (selectedRadioId === folderId) {
+      setSelectedRadioId(null);
+      setValues({
+        ...values,
+        existingFolder: "",
+        folder: 0,
+      });
+      event.currentTarget.checked = false;
+    } else {
+      setSelectedRadioId(folderId);
+    }
+  };
+  
+  const onRadioChange = (event: React.ChangeEvent<HTMLInputElement>, folderId: number) => {
+    setValues({
+      ...values,
+      [event.target.name]: event.target.value,
+      folder: folderId,
+    });
+  };
+
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+   
+    if (!values.existingFolder && !values.newFolder || values.existingFolder && values.newFolder) {
+      toast.error("Please select OR enter a folder name");
+      return;
+    }
+    if (values.existingFolder) {
+      const data = {
+        item_id: values.itemID,
+        folder_id: values.folder,
+      };
+      fetcher<{ id: number }>(`/favorite`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      })
+      .then((data) => {
+        console.log(`POST success:`, data);
+        closeModal();
+        toast.success("Item added to favorites");
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+        console.error("POST error:", error);
+      });
+  
+    } else {
+      console.log("新しくフォルダを追加");
+    }
   }
 
   return (
@@ -120,18 +186,20 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
             <input
               className="w3-radio"
               type="radio"
-              name="folder"
+              name="existingFolder"
               value={folder.FavoriteFolderName}
-              onChange={onRadioChange}
+              onClick={(event) => onRadioClick(event, folder.FavoriteFolderID)}
+              onChange={(event) => onRadioChange(event, folder.FavoriteFolderID)}
             />
             <label>{folder.FavoriteFolderName}</label>
           </p>
         ))}
         <input
               type="text"
-              name="name"
+              name="newFolder"
               id="MerTextInput"
               placeholder="+ New Folder"
+              onChange={onValueChange}
         />
          <button type="submit" id="MerButton">
               Register

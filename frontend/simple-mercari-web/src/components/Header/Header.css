@@ -30,6 +30,6 @@ button {
   background: transparent;
 }
 
-.bi-heart-fill{
+.header button .bi-heart-fill{
   font-size:2.5rem;
 }

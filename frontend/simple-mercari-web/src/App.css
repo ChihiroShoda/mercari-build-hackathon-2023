@@ -319,12 +319,42 @@ body {
   margin:20px 100px;
 }
 
-
 .Balance{
   width: 400px;
   margin: 20px 0;
 }
 
+
+/*---------------------------------
+　Favorite
+---------------------------------*/
+.Favorite{
+  margin: 20px 100px;
+}
+
+.Favorite h1{
+  margin:20px;
+}
+.Favorite .w3-sidebar{
+  border-right:#666 solid 1px;
+  background-color: whitesmoke;
+  text-align:center;
+  padding:20px 0;
+  width:15%;
+}
+
+.Favorite .AddItem{
+  display: none;
+}
+
+.Favorite .w3-sidebar a{
+  font-size:1.5rem;
+  text-align:center;
+}
+
+.Favorite .MyItem{
+  margin-left:25%;
+}
 /*---------------------------------
 　Signup&Login
 ---------------------------------*/

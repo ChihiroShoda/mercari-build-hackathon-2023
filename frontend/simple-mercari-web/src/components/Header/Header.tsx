@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
           <button onClick={() => navigate(`/user/${cookies.userID}`)}>
             <i className="bi bi-person-fill"></i>
           </button>
-          <button onClick={() => navigate(`/`)}>
+          <button onClick={() => navigate(`/favorite`)}>
             <i className="bi bi-heart-fill"></i>
           </button>
           <button onClick={onLogout}>
