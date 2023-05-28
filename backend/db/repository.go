@@ -60,6 +60,8 @@ type ItemRepository interface {
 	UpdateItemStatus(ctx context.Context, id int32, status domain.ItemStatus) error
 	GetFolders(ctx context.Context, id int64) ([]domain.FavoriteFolder, error)
 	AddItemToFavoriteFolder(ctx context.Context, itemID int32, folderID int32) error
+	GetFavoriteItems(ctx context.Context, folderID int64) ([]domain.FavoriteItem, error)
+	RemoveFavoriteItem(tx context.Context, itemID int32, folderID int32) error
 }
 
 type ItemDBRepository struct {
@@ -224,6 +226,35 @@ func (r *ItemDBRepository) GetFolders(ctx context.Context, id int64) ([]domain.F
 
 func (r *ItemDBRepository) AddItemToFavoriteFolder(ctx context.Context, itemID int32, folderID int32) error {
 	if _, err := r.ExecContext(ctx, "INSERT INTO favorite (item_id, favorite_folder_id) VALUES (?, ?)", itemID, folderID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *ItemDBRepository) GetFavoriteItems(ctx context.Context, folderID int64) ([]domain.FavoriteItem, error) {
+	rows, err := r.QueryContext(ctx, "SELECT * FROM favorite WHERE favorite_folder_id = ?", folderID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []domain.FavoriteItem
+	for rows.Next() {
+		var item domain.FavoriteItem
+		if err := rows.Scan(&item.ItemID, &item.FolderID); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (r *ItemDBRepository) RemoveFavoriteItem(ctx context.Context, itemID int32, folderID int32) error {
+	if _, err := r.ExecContext(ctx, "DELETE FROM favorite WHERE item_id = ? and favorite_folder_id = ?", itemID, folderID); err != nil {
 		return err
 	}
 	return nil

@@ -31,3 +31,8 @@ type FavoriteFolder struct {
 	FavoriteFolderID   int64
 	FavoriteFolderName string
 }
+
+type FavoriteItem struct {
+	ItemID   int32
+	FolderID   int32
+}
