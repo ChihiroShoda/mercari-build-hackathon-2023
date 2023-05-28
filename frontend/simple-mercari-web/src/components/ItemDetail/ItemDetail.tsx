@@ -30,6 +30,7 @@ export const ItemDetail = () => {
   const [item, setItem] = useState<Item>();
   const [itemImage, setItemImage] = useState<Blob>();
   const [cookies] = useCookies(["token", "userID"]);
+  const userID = cookies.userID;
 
   const fetchItem = () => {
     fetcher<Item>(`/items/${params.id}`, {
@@ -130,6 +131,9 @@ export const ItemDetail = () => {
               <button onClick={onSubmit} id="MerButton">
                 Purchase
               </button>
+            )}
+            {userID === String(item?.user_id) && (
+                <button onClick={() => navigate(`/item/${item.id}/edit`)} className="EditButton">Edit</button>
             )}
             </div>
           </div>
