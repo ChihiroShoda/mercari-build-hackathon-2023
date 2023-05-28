@@ -104,6 +104,9 @@ curl -X POST 'http://127.0.0.1:9000/favorite' -d '{"item_id": 2, "folder_id": 1}
 
 # Get faborite items
 curl -X GET 'http://127.0.0.1:9000/favorite/1' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>"
+
+# Remove a favorite item
+curl -X POST 'http://127.0.0.1:9000/favorite/delete' -d '{"item_id": 4, "folder_id": 1}' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
 ```
 
 ###  Structure
