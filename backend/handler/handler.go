@@ -676,3 +676,19 @@ func getEnv(key string, defaultValue string) string {
 	}
 	return value
 }
+
+func (h *Handler) GetFavoriteFolders(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	folders, err := h.ItemRepo.GetFolders(ctx, userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, folders)
+}
