@@ -130,6 +130,23 @@ type Handler struct {
 	ItemRepo db.ItemRepository
 }
 
+type addItemToFavoriteRequest struct {
+	ItemID	 int32 `json:"item_id"`
+	FolderID int32 `json:"folder_id"`
+}
+
+type getFavoriteItemsResponse struct {
+	ID           int32  `json:"id"`
+	Name         string `json:"name"`
+	Price        int64  `json:"price"`
+	CategoryName string `json:"category_name"`
+}
+
+type removeFavoriteItemRequest struct {
+	ItemID	 int32 `json:"item_id"`
+	FolderID int32 `json:"folder_id"`
+}
+
 func GetSecret() string {
 	if secret := os.Getenv("SECRET"); secret != "" {
 		return secret
@@ -675,4 +692,88 @@ func getEnv(key string, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+func (h *Handler) GetFavoriteFolders(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	folders, err := h.ItemRepo.GetFolders(ctx, userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, folders)
+}
+
+func (h *Handler) AddItemToFavoriteFolder(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	req := new(addItemToFavoriteRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	fmt.Printf("itemID = %d\n", req.ItemID)
+	fmt.Printf("folderID = %d\n", req.FolderID)
+
+	if err := h.ItemRepo.AddItemToFavoriteFolder(ctx, req.ItemID, req.FolderID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, "successful")
+}
+
+func (h *Handler) GetFavoriteItems(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	folderID, err := strconv.ParseInt(c.Param("folderID"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid folderID type")
+	}
+
+	itemIDs, err := h.ItemRepo.GetFavoriteItems(ctx, folderID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	var res [] getFavoriteItemsResponse
+
+	cats, err := h.ItemRepo.GetCategories(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	for _, itemID := range itemIDs {
+		item, err := h.ItemRepo.GetItem(ctx, itemID.ItemID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		for _, cat := range cats {
+			if cat.ID == item.CategoryID {
+				res = append(res, getFavoriteItemsResponse{ID: item.ID, Name: item.Name, Price: item.Price, CategoryName: cat.Name})
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) RemoveFavoriteItem(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	req := new(removeFavoriteItemRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.ItemRepo.RemoveFavoriteItem(ctx, req.ItemID, req.FolderID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "cannot delete the favorite item")
+	}	
+
+	return c.JSON(http.StatusOK, "successful")
 }
