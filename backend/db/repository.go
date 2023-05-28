@@ -61,6 +61,7 @@ type ItemRepository interface {
 	GetFolders(ctx context.Context, id int64) ([]domain.FavoriteFolder, error)
 	AddItemToFavoriteFolder(ctx context.Context, itemID int32, folderID int32) error
 	GetFavoriteItems(ctx context.Context, folderID int64) ([]domain.FavoriteItem, error)
+	RemoveFavoriteItem(tx context.Context, itemID int32, folderID int32) error
 }
 
 type ItemDBRepository struct {
@@ -250,4 +251,11 @@ func (r *ItemDBRepository) GetFavoriteItems(ctx context.Context, folderID int64)
 		return nil, err
 	}
 	return items, nil
+}
+
+func (r *ItemDBRepository) RemoveFavoriteItem(ctx context.Context, itemID int32, folderID int32) error {
+	if _, err := r.ExecContext(ctx, "DELETE FROM favorite WHERE item_id = ? and favorite_folder_id = ?", itemID, folderID); err != nil {
+		return err
+	}
+	return nil
 }

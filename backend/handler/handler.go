@@ -142,6 +142,11 @@ type getFavoriteItemsResponse struct {
 	CategoryName string `json:"category_name"`
 }
 
+type removeFavoriteItemRequest struct {
+	ItemID	 int32 `json:"item_id"`
+	FolderID int32 `json:"folder_id"`
+}
+
 func GetSecret() string {
 	if secret := os.Getenv("SECRET"); secret != "" {
 		return secret
@@ -756,4 +761,19 @@ func (h *Handler) GetFavoriteItems(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) RemoveFavoriteItem(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	req := new(removeFavoriteItemRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.ItemRepo.RemoveFavoriteItem(ctx, req.ItemID, req.FolderID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "cannot delete the favorite item")
+	}	
+
+	return c.JSON(http.StatusOK, "successful")
 }
