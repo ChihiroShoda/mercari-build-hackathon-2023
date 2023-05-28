@@ -17,11 +17,19 @@ interface FavoriteFolder {
   FavoriteFolderName: string;
 }
 
+type formDataType = {
+  folder: number;
+};
+
 export const Item: React.FC<{ item: Item }> = ({ item }) => {
+  const initialState ={
+    folder:0,
+  }
   const navigate = useNavigate();
   const [itemImage, setItemImage] = useState<string>("");
   const [cookies] = useCookies(["token"]);
   const [favoriteFolders, setFavoriteFolders] = useState<FavoriteFolder[]>([]);
+  const [values, setValues] = useState<formDataType>(initialState);
 
   async function getItemImage(itemId: number): Promise<Blob> {
     return await fetcherBlob(`/items/${itemId}/image`, {
@@ -34,7 +42,6 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     });
   }
 
-  
   const getFavoriteFolders = ()=> {
     fetcher<FavoriteFolder[]>(`/favorite`, {
       method: "GET",
@@ -59,7 +66,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
       getFavoriteFolders();
     }, [item]);
     
-  const onSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const target =  event.currentTarget.parentElement;
     const icon = target?.querySelector("i");
     if(icon?.classList.contains("bi-heart-fill")){
@@ -82,10 +89,21 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     }
   };
 
+  const onRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValues({
+      ...values,
+      [event.target.name]: event.target.value,
+    });
+  };
+  
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+
+  }
+
   return (
     <div className="w3-card-4 itemList">
     <img src={itemImage} alt="..." onClick={() => navigate(`/item/${item.id}`)}></img>
-    <button onClick={onSubmit} id = "favorite">
+    <button onClick={onClick} id = "favorite">
       <i className="bi bi-heart"></i>
     </button>
     <div id="id01" className="w3-modal">
@@ -96,7 +114,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
         <h2>Folders</h2>
       </header>
       <div className="w3-container" id="select-folder">
-      <form>
+      <form onSubmit={onSubmit}>
         {favoriteFolders.map((folder) => (
           <p key={folder.FavoriteFolderID}>
             <input
@@ -104,7 +122,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
               type="radio"
               name="folder"
               value={folder.FavoriteFolderName}
-              checked={folder.FavoriteFolderName === "food"}
+              onChange={onRadioChange}
             />
             <label>{folder.FavoriteFolderName}</label>
           </p>
