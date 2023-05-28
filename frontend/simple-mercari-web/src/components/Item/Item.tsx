@@ -96,7 +96,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   </div>
     <div className="w3-container w3-center">
       <b>{item.name}</b>
-      <p>{item.price}</p>
+      <p>￥{item.price}</p>
     </div>
   </div>
   );
