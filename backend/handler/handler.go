@@ -292,13 +292,18 @@ func (h *Handler) AddItem(c echo.Context) error {
 }
 
 func (h *Handler) UpdateItem(c echo.Context) error {
-	// TODO: validation
+	// DONE: validation
 	// http.StatusBadRequest(400)
 	ctx := c.Request().Context()
 
 	req := new(updateItemRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "all columns are required")
 	}
 
 	userID, err := getUserID(c)
@@ -632,6 +637,13 @@ func (h *Handler) Purchase(c echo.Context) error {
 	if sellerID == userID {
 		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
 	}
+
+	// TODO: update only when item status is on sale
+	// http.StatusPreconditionFailed(412)
+	if item.Status != domain.ItemStatusOnSale {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is not on sale.")
+	}
+
 	/*Balanceの判定*/
 	user, err := h.UserRepo.GetUser(ctx, userID)
 	// TODO: not found handling
@@ -642,9 +654,6 @@ func (h *Handler) Purchase(c echo.Context) error {
 	if user.Balance-item.Price < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
 	}
-
-	// TODO: update only when item status is on sale
-	// http.StatusPreconditionFailed(412)
 
 	// オーバーフローしていると。ここのint32(itemID)がバグって正常に処理ができないはず
 	if err := h.ItemRepo.UpdateItemStatus(ctx, int32(itemID), domain.ItemStatusSoldOut); err != nil {
