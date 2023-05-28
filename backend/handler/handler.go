@@ -130,6 +130,11 @@ type Handler struct {
 	ItemRepo db.ItemRepository
 }
 
+type addItemToFavoriteRequest struct {
+	ItemID	 int32 `json:"item_id"`
+	FolderID int32 `json:"folder_id"`
+}
+
 func GetSecret() string {
 	if secret := os.Getenv("SECRET"); secret != "" {
 		return secret
@@ -691,4 +696,22 @@ func (h *Handler) GetFavoriteFolders(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, folders)
+}
+
+func (h *Handler) AddItemToFavoriteFolder(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	req := new(addItemToFavoriteRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	fmt.Printf("itemID = %d\n", req.ItemID)
+	fmt.Printf("folderID = %d\n", req.FolderID)
+
+	if err := h.ItemRepo.AddItemToFavoriteFolder(ctx, req.ItemID, req.FolderID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, "successful")
 }
