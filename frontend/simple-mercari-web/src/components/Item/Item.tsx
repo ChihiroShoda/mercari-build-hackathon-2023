@@ -117,7 +117,8 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   }; 
   const closeModal = () => {
     if (!values.existingFolder && !values.newFolder) {
-      const icon = document.querySelector(".bi-heart-fill");
+      const target = document.getElementById("favorite");
+      const icon = target?.querySelector("i");
       icon?.classList.remove("bi-heart-fill");
       icon?.classList.toggle("bi-heart");
     }
