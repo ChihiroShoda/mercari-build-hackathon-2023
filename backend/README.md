@@ -90,6 +90,7 @@ curl -X POST 'http://127.0.0.1:9000/balance' -d '{"balance": 1000}' -H "Authoriz
 # {"balance":1000}
 curl -X GET 'http://127.0.0.1:9000/balance' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>"
 # Sell
+#以下のcurl文でuser_idを入力する必要がないと思われる。（tokenでuserの識別をするのが正しいと思うから。）
 # "successful"
 curl -X POST 'http://127.0.0.1:9000/sell' -d '{"user_id": 1, "item_id": 1}' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>" -H 'Content-Type: application/json'
 # Purchase

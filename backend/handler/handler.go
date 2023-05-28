@@ -131,7 +131,7 @@ type Handler struct {
 }
 
 type addItemToFavoriteRequest struct {
-	ItemID	 int32 `json:"item_id"`
+	ItemID   int32 `json:"item_id"`
 	FolderID int32 `json:"folder_id"`
 }
 
@@ -382,8 +382,17 @@ func (h *Handler) Sell(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	// TODO: check req.UserID and item.UserID
+	// DONE: check req.UserID and item.UserID
 	// http.StatusPreconditionFailed(412)
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	if item.UserID != userID {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item does not belong to you.")
+	}
+
 	// TODO: only update when status is initial
 	// http.StatusPreconditionFailed(412)
 	if err := h.ItemRepo.UpdateItemStatus(ctx, item.ID, domain.ItemStatusOnSale); err != nil {
@@ -551,7 +560,7 @@ func (h *Handler) AddBalance(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	
+
 	if req.Balance < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Don't add minus balance")
 	}
@@ -629,7 +638,7 @@ func (h *Handler) Purchase(c echo.Context) error {
 	if user.Balance-item.Price < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
 	}
-	
+
 	// TODO: update only when item status is on sale
 	// http.StatusPreconditionFailed(412)
 
@@ -638,14 +647,10 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-
-
-
 	// TODO: balance consistency
 	if err := h.UserRepo.UpdateBalance(ctx, userID, user.Balance-item.Price); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-
 
 	seller, err := h.UserRepo.GetUser(ctx, sellerID)
 	// TODO: not found handling
