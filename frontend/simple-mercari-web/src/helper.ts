@@ -48,12 +48,21 @@ const wrapBlob = (task: Promise<Response>): Promise<Blob> => {
   });
 };
 
-export const fetcher = <T = any>(
-  url: string,
-  init?: RequestInit
-): Promise<T> => {
-  return wrap<T>(fetch(server.concat(url), init));
+export const fetcher = <T = any>(url: string, init?: RequestInit): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    fetch(server.concat(url), init)
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          reject(response);
+        }
+      })
+      .then((data) => resolve(data as T))
+      .catch((error) => reject(error));
+  });
 };
+
 
 export const fetcherBlob = (url: string, init?: RequestInit): Promise<Blob> => {
   return wrapBlob(fetch(server.concat(url), init));

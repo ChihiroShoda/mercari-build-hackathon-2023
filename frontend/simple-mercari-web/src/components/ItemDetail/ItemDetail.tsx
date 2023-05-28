@@ -30,7 +30,6 @@ export const ItemDetail = () => {
   const [item, setItem] = useState<Item>();
   const [itemImage, setItemImage] = useState<Blob>();
   const [cookies] = useCookies(["token", "userID"]);
-  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const fetchItem = () => {
     fetcher<Item>(`/items/${params.id}`, {
@@ -78,16 +77,24 @@ export const ItemDetail = () => {
         user_id: Number(cookies.userID),
       }),
     })
+
     //!ボタンを押したら,ページをreloadするのではなく、一部更新する
      .then((_) => {
-      fetchItem();
-      })
-      .catch((err) => {
-        console.log(`POST error:`, err);
-        toast.error(err.message);
-        //!ここbackendからのmessageを表示させたい
-        setErrorMessage("This item is listed by you!");
-      });
+        // 正常なレスポンス
+        fetchItem();
+    })
+    .catch((err) => {
+      if (err instanceof Response) {
+        err.json().then((data) => {
+          console.log(`POST error:`, err);
+          toast.error(data.message);
+        });
+      }
+      // } else {
+      //   console.log(`POST error:`, err);
+      //   toast.error(err.message);
+      // }
+    });
   };
 
   useEffect(() => {
@@ -99,25 +106,22 @@ export const ItemDetail = () => {
       <MerComponent condition={() => item !== undefined}>
         {item && itemImage && (
           <div className="ItemDetailContainer">
-            <img
-              height={480}
-              width={480}
-              src={URL.createObjectURL(itemImage)}
-              alt="item"
-              onClick={() => navigate(`/item/${item.id}`)}
-            />
+            <div className="ItemNameandImage">
+            <h1> {item.name}</h1>
+              <img
+                height={480}
+                width={480}
+                src={URL.createObjectURL(itemImage)}
+                alt="item"
+                onClick={() => navigate(`/item/${item.id}`)}
+              />
+            </div>
             <div className="Detail">
-            <p>
-              <span>Item Name: {item.name}</span>
-              <br />
-              <span>Price: {item.price}</span>
-              <br />
-              <span>UserID: {item.user_id}</span>
-              <br />
-              <span>Category: {item.category_name}</span>
-              <br />
-              <span>Description: {item.description}</span>
-            </p>
+               <h1>￥{item.price}</h1>
+              <h3>Category</h3>
+               <p> {item.category_name}</p>
+              <h3>Description</h3>
+               <p> {item.description}</p>
             {item.status == ItemStatus.ItemStatusSoldOut ? (
               <button disabled={true} onClick={onSubmit} id="MerDisableButton">
                 SoldOut
@@ -127,7 +131,6 @@ export const ItemDetail = () => {
                 Purchase
               </button>
             )}
-            {errorMessage && <p className="ErrorMessage">{errorMessage}</p>}
             </div>
           </div>
         )}
