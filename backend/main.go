@@ -8,12 +8,13 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/db"
+	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/handler"
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/db"
-	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/handler"
 )
 
 const (
@@ -91,6 +92,7 @@ func run(ctx context.Context) int {
 	l.Use(echojwt.WithConfig(config))
 	l.GET("/users/:userID/items", h.GetUserItems)
 	l.POST("/items", h.AddItem)
+	l.PUT("/items/:itemID", h.UpdateItem)
 	l.POST("/sell", h.Sell)
 	l.POST("/purchase/:itemID", h.Purchase)
 	l.GET("/balance", h.GetBalance)
