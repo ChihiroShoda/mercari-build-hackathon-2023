@@ -58,6 +58,7 @@ type ItemRepository interface {
 	GetCategories(ctx context.Context) ([]domain.Category, error)
 	UpdateItemStatus(ctx context.Context, id int32, status domain.ItemStatus) error
 	GetFolders(ctx context.Context, id int64) ([]domain.FavoriteFolder, error)
+	AddItemToFavoriteFolder(ctx context.Context, itemID int32, folderID int32) error
 }
 
 type ItemDBRepository struct {
@@ -210,4 +211,11 @@ func (r *ItemDBRepository) GetFolders(ctx context.Context, id int64) ([]domain.F
 		return nil, err
 	}
 	return folders, nil
+}
+
+func (r *ItemDBRepository) AddItemToFavoriteFolder(ctx context.Context, itemID int32, folderID int32) error {
+	if _, err := r.ExecContext(ctx, "INSERT INTO favorite (item_id, favorite_folder_id) VALUES (?, ?)", itemID, folderID); err != nil {
+		return err
+	}
+	return nil
 }

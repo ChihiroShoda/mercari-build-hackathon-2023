@@ -96,6 +96,7 @@ func run(ctx context.Context) int {
 	l.GET("/balance", h.GetBalance)
 	l.POST("/balance", h.AddBalance)
 	l.GET("/favorite", h.GetFavoriteFolders)
+	l.POST("/favorite", h.AddItemToFavoriteFolder)
 
 	// Start server
 	go func() {
