@@ -301,6 +301,9 @@ body {
 .ItemDetailContainer .ItemNameandImage h1{
   font-weight: bold;
   margin-bottom:30px;
+  text-align: center;
+  padding:10px;
+  /* border-bottom:#666 solid 1px ; */
 }
 .ItemDetailContainer .Detail h1{
   font-weight: bold;
@@ -312,7 +315,7 @@ body {
   font-weight: bold;
 }
 
-.ItemDetailContainer .EditButton {
+.EditButton {
   /* color: var(--alias-color-text-inverse-default); */
   background-color: #ff7676;
   color: white;
