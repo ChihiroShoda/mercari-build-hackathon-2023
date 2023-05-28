@@ -1,6 +1,6 @@
 /*!header:padding-leftでタイトルに位置調整している野を治す*/
 
-header {
+.header {
     position: fixed;
     border: solid 1px #ECEFF1;
     border-radius: 0 0 40% 40%;
@@ -10,7 +10,7 @@ header {
     z-index: 9999; /* 他の要素よりも手前に表示 */
 }
 
-header a{
+.header a{
   text-decoration:none;
   font-weight: bold;
 }
@@ -28,4 +28,8 @@ header a{
 button {
   border: none;
   background: transparent;
+}
+
+.bi-heart-fill{
+  font-size:2.5rem;
 }

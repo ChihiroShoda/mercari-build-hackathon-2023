@@ -163,6 +163,52 @@ body {
   }
 
 /*---------------------------------
+　Item
+---------------------------------*/
+.w3-card-4 {
+  width:100%;
+  position: relative;
+}
+
+.w3-card-4 img{
+   width: 100%;
+  height: 200px;
+  object-fit: cover;
+  margin-bottom:20px;
+}
+
+.w3-card-4 #favorite{
+  position: absolute;
+  right: 20px;
+  bottom: 75px;
+  width: 60px;
+  height: 60px;
+  /* color: #ffffff; */
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.w3-card-4 button i{
+  font-size: 2rem;
+}
+
+.w3-card-4 #favorite .bi-heart-fill{
+  color:#ff7676;
+}
+
+.w3-modal .w3-modal-content {
+  margin-top:150px;
+  padding:20px;
+  width:400px;
+}
+
+.w3-modal #select-folder label{
+  padding-left:10px;
+}
+/*---------------------------------
 　ItemList
 ---------------------------------*/
 /* 
@@ -184,18 +230,6 @@ body {
   row-gap:40px;
   
 }
-.ItemCards .w3-card-4{
-  width:100%;
-}
-
-.w3-card-4 img{
-   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  margin-bottom:20px;
-}
-
-
 
 /*---------------------------------
 　Listing Button
@@ -218,6 +252,8 @@ body {
 }
 .Listing .w3-card-4{
   margin-left: 250px;
+  position: unset;
+  width: auto;
 }
 .Listing .w3-container .w3-center h1{
   font-weight:bold;
