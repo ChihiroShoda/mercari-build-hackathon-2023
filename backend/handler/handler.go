@@ -638,7 +638,7 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
 	}
 
-	// TODO: update only when item status is on sale
+	// DONE: update only when item status is on sale
 	// http.StatusPreconditionFailed(412)
 	if item.Status != domain.ItemStatusOnSale {
 		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is not on sale.")
