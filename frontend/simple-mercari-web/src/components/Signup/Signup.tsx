@@ -12,6 +12,11 @@ export const Signup = () => {
 
   const navigate = useNavigate();
   const onSubmit = (_: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (!name || !password) {
+      const errorMessage = "Please fill out all fields";
+      toast.error(errorMessage);
+      return;
+    }
     fetcher<{ id: number; name: string }>(`/register`, {
       method: "POST",
       headers: {

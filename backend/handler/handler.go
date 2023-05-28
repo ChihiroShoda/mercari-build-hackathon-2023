@@ -12,10 +12,10 @@ import (
 
 	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/db"
 	"github.com/ChihiroShoda/mecari-build-hackathon-2023/backend/domain"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
-	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -91,6 +91,17 @@ type addItemRequest struct {
 }
 
 type addItemResponse struct {
+	ID int64 `json:"id"`
+}
+
+type updateItemRequest struct {
+	Name        string `form:"name"`
+	CategoryID  int64  `form:"category_id"`
+	Price       int64  `form:"price"`
+	Description string `form:"description"`
+}
+
+type updateItemResponse struct {
 	ID int64 `json:"id"`
 }
 
@@ -280,6 +291,82 @@ func (h *Handler) AddItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, addItemResponse{ID: int64(item.ID)})
 }
 
+func (h *Handler) UpdateItem(c echo.Context) error {
+	// TODO: validation
+	// http.StatusBadRequest(400)
+	ctx := c.Request().Context()
+
+	req := new(updateItemRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	itemID, err := strconv.Atoi(c.Param("itemID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid itemID")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	if item.UserID != userID {
+		return echo.NewHTTPError(http.StatusForbidden, "you are not authorized to update this item")
+	}
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	defer src.Close()
+
+	var dest []byte
+	blob := bytes.NewBuffer(dest)
+	// TODO: pass very big file
+	// http.StatusBadRequest(400)
+	if _, err := io.Copy(blob, src); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	_, err = h.ItemRepo.GetCategory(ctx, req.CategoryID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid categoryID")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	updatedItem, err := h.ItemRepo.UpdateItem(c.Request().Context(), domain.Item{
+		ID:          int32(itemID),
+		Name:        req.Name,
+		CategoryID:  req.CategoryID,
+		UserID:      userID,
+		Price:       req.Price,
+		Description: req.Description,
+		Image:       blob.Bytes(),
+		Status:      domain.ItemStatusInitial,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, updateItemResponse{ID: int64(updatedItem.ID)})
+}
+
 func (h *Handler) Sell(c echo.Context) error {
 	ctx := c.Request().Context()
 	req := new(sellRequest)
@@ -464,7 +551,7 @@ func (h *Handler) AddBalance(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-
+	
 	if req.Balance < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Don't add minus balance")
 	}
@@ -520,6 +607,29 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	//下のUpdateItemStatusの前にsellerIDとBalanceの判定しないと、statusがsoldoutになってしまう
+	/*SellerIDの判定*/
+	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
+	// TODO: not found handling
+	// http.StatusNotFound(404)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	sellerID := item.UserID
+	if sellerID == userID {
+		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
+	}
+	/*Balanceの判定*/
+	user, err := h.UserRepo.GetUser(ctx, userID)
+	// TODO: not found handling
+	// http.StatusNotFound(404)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if user.Balance-item.Price < 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
+	}
+	
 	// TODO: update only when item status is on sale
 	// http.StatusPreconditionFailed(412)
 
@@ -528,33 +638,14 @@ func (h *Handler) Purchase(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	user, err := h.UserRepo.GetUser(ctx, userID)
-	// TODO: not found handling
-	// http.StatusNotFound(404)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
 
-	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
-	// TODO: not found handling
-	// http.StatusNotFound(404)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
 
-	if user.Balance-item.Price < 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
-	}
 
 	// TODO: balance consistency
 	if err := h.UserRepo.UpdateBalance(ctx, userID, user.Balance-item.Price); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	sellerID := item.UserID
-	if sellerID == userID {
-		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
-	}
 
 	seller, err := h.UserRepo.GetUser(ctx, sellerID)
 	// TODO: not found handling

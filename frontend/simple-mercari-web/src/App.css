@@ -114,6 +114,102 @@ body {
   color: white;
 }
 
+/*---------------------------------
+  Error
+---------------------------------*/
+.error-message {
+  font-size: 15px;
+  color: #ff7676;
+  text-align: left;
+}
+
+/*---------------------------------
+  Home
+---------------------------------*/
+.IdandSearch{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 20px;
+}
+.input-container{
+  display: flex;
+}
+/*フォーム全体*/
+#form1{
+  margin-bottom:15px;/*フォームの下に余白*/	 	
+  }
+  /*検索ボックス*/
+  #sbox{ 	
+  outline:0;/*クリック時の青い枠線消す*/	
+  height:50px;/*検索ボックスの高さ*/	
+  padding:0 10px;/*テキスト位置調整*/	 
+  border-radius:4px;/*検索ボックスの角を丸める*/		
+  background:#eee;/*検索ボックスの背景カラー*/		
+  }
+  /*検索ボタン*/
+  #sbtn{
+  width:70px;/*検索ボタンの横幅*/ 
+  height:50px;/*検索ボタンの縦幅*/ 
+  border-radius:4px;/*検索ボタンの角を丸める*/ 
+  background:#4DC9FF;/*検索ボタンの背景カラー*/ 
+  border:none;/*検索ボタンの枠線を消す*/ 
+  color:#fff;/*検索ボタンのテキストカラー*/ 
+  font-size:16px;/*検索ボタンのフォントサイズ*/ 
+  }
+  /*検索ボタンマウスオーバー時*/
+  #sbtn:hover{
+  color:#666;/*検索ボタンマウスオーバー時のフォントカラー*/ 
+  }
+
+/*---------------------------------
+　ItemList
+---------------------------------*/
+/* 
+.ItemList {
+  background-color: #222427;
+  min-height: 8vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: left;
+  font-size: calc(10px + 1vmin);
+  color: white;
+} */
+
+.ItemCards{
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  column-gap: 30px;
+  row-gap:40px;
+  
+}
+.ItemCards .w3-card-4{
+  width:100%;
+}
+
+.w3-card-4 img{
+   width: 100%;
+  height: 200px;
+  object-fit: cover;
+  margin-bottom:20px;
+}
+
+
+
+/*---------------------------------
+　Listing Button
+---------------------------------*/
+.AddItem{
+  bottom:50px;
+  right:100px;
+  position:fixed;
+}
+
+/*---------------------------------
+  Listing
+---------------------------------*/
+
 .Listing {
   width: 100%;
   display: flex;
@@ -130,41 +226,6 @@ body {
   border-bottom: dashed 1px #222427;
 }
 
-
-.ItemList {
-  background-color: #222427;
-  min-height: 8vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: left;
-  font-size: calc(10px + 1vmin);
-  color: white;
-}
-
-.ItemCards{
-  display: grid;
-  grid-template-columns: repeat(5,1fr);
-  column-gap: 30px;
-  row-gap:40px;
-}
-.ItemCards .w3-card-4{
-  width:100%;
-}
-.w3-card-4 img{
-   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  margin-bottom:20px;
-}
-
-.AddItem{
-  bottom:50px;
-  right:100px;
-  position:fixed;
-}
-
-
 .ListingForm {
   width: 100%;
   display: flex;
@@ -173,6 +234,9 @@ body {
   justify-content: left;
 }
 
+/*---------------------------------
+　ItemDetail
+---------------------------------*/
 .ItemDetail {
   width: 100%;
   display: flex;
@@ -192,23 +256,42 @@ body {
 .ItemDetailContainer img{
   width: 400px;
   height: 400px;
-  object-fit: cover;
+  object-fit: contain;
   margin: 0 50px;
 }
-
 .ItemDetailContainer .Detail{
   width:400px;
 }
+.ItemDetailContainer .ItemNameandImage h1{
+  font-weight: bold;
+  margin-bottom:30px;
+}
+.ItemDetailContainer .Detail h1{
+  font-weight: bold;
+  color:#ff7676;
+  text-align: center;
+}
 
+.ItemDetailContainer .Detail h3{
+  font-weight: bold;
+}
+
+/*---------------------------------
+　UserProfile
+---------------------------------*/
 .UserProfile {
   margin:20px 100px;
 }
+
 
 .Balance{
   width: 400px;
   margin: 20px 0;
 }
 
+/*---------------------------------
+　Signup&Login
+---------------------------------*/
 .SignupContainer{
   width: 100%;
   display: flex;
@@ -225,6 +308,11 @@ body {
   text-align: center;
 }
 
+
+
+/*---------------------------------
+　Notfound
+---------------------------------*/
 .Notfound{
   margin:200px auto;
   display:flex;

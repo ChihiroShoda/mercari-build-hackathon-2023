@@ -76,6 +76,10 @@ $ curl -X POST \
   -F 'description=samplesamplesample' \
   -F 'image=@image.jpg' \
   -H "Authorization: Bearer <Token which get login endpoint>"
+
+# Update item
+# try this after adding a new item
+curl -X PUT --url 'http://127.0.0.1:9000/items/21' -F 'name=updatedTV' -F 'category_id=1' -F 'price=100' -F 'description=updated' -F 'image=@image.jpg' -H "Authorization: Bearer <Token which get login endpoint>"
 # Item list
 # [{"id":3,"name":"Cucumber","price":80,"image": ..."}]
 curl -X GET 'http://127.0.0.1:9000/users/1/items' -H "Authorization: Bearer <ログイン時のレスポンスで返ってきたtokenの値を入れる>"
