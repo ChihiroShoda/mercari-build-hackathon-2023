@@ -147,6 +147,10 @@ type removeFavoriteItemRequest struct {
 	FolderID int32 `json:"folder_id"`
 }
 
+type addFavoriteFolderRequest struct {
+	FolderName string `json:"folder_name" validate:"required`
+}
+
 func GetSecret() string {
 	if secret := os.Getenv("SECRET"); secret != "" {
 		return secret
@@ -792,6 +796,26 @@ func (h *Handler) RemoveFavoriteItem(c echo.Context) error {
 	if err := h.ItemRepo.RemoveFavoriteItem(ctx, req.ItemID, req.FolderID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "cannot delete the favorite item")
 	}
+
+	return c.JSON(http.StatusOK, "successful")
+}
+
+func (h *Handler) AddNewFavoriteFolder(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	req := new(addFavoriteFolderRequest)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.ItemRepo.AddFavoriteFolder(ctx, userID, req.FolderName); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "cannot add a favorite folder")
+	}	
 
 	return c.JSON(http.StatusOK, "successful")
 }
