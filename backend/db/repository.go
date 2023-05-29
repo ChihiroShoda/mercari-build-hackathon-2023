@@ -232,7 +232,7 @@ func (r *ItemDBRepository) AddItemToFavoriteFolder(ctx context.Context, itemID i
 }
 
 func (r *ItemDBRepository) GetFavoriteItems(ctx context.Context, folderID int64) ([]domain.FavoriteItem, error) {
-	rows, err := r.QueryContext(ctx, "SELECT * FROM favorite WHERE favorite_folder_id = ?", folderID)
+	rows, err := r.QueryContext(ctx, "SELECT DISTINCT * FROM favorite WHERE favorite_folder_id = ?", folderID)
 
 	if err != nil {
 		return nil, err
