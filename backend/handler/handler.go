@@ -397,9 +397,12 @@ func (h *Handler) Sell(c echo.Context) error {
 	}
 
 	item, err := h.ItemRepo.GetItem(ctx, req.ItemID)
-	// TODO: not found handling
+	// DONE: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Item not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -434,6 +437,9 @@ func (h *Handler) GetOnSaleItems(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Item not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -462,9 +468,12 @@ func (h *Handler) GetItem(c echo.Context) error {
 	}
 
 	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
-	// TODO: not found handling
+	// DONE: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Item not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -496,6 +505,9 @@ func (h *Handler) GetUserItems(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Item not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -522,6 +534,9 @@ func (h *Handler) GetCategories(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Categories not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -599,6 +614,9 @@ func (h *Handler) AddBalance(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "User not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -621,6 +639,9 @@ func (h *Handler) GetBalance(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "User not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -644,11 +665,15 @@ func (h *Handler) Purchase(c echo.Context) error {
 	//下のUpdateItemStatusの前にsellerIDとBalanceの判定しないと、statusがsoldoutになってしまう
 	/*SellerIDの判定*/
 	item, err := h.ItemRepo.GetItem(ctx, int32(itemID))
-	// TODO: not found handling
+	// DONE: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Item not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
 	sellerID := item.UserID
 	if sellerID == userID {
 		return echo.NewHTTPError(http.StatusPreconditionFailed, "This item is listed by you!")
@@ -665,8 +690,12 @@ func (h *Handler) Purchase(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "User not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
 	if user.Balance-item.Price < 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "Insufficient balance")
 	}
@@ -685,6 +714,9 @@ func (h *Handler) Purchase(c echo.Context) error {
 	// TODO: not found handling
 	// http.StatusNotFound(404)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Seller not found.")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
