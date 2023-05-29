@@ -807,8 +807,8 @@ func (h *Handler) AddNewFavoriteFolder(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err)
 	}
-
-	req := new(addFavoriteFolderRequest)
+  
+  req := new(addFavoriteFolderRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -818,4 +818,40 @@ func (h *Handler) AddNewFavoriteFolder(c echo.Context) error {
 	}	
 
 	return c.JSON(http.StatusOK, "successful")
+}
+
+
+func (h *Handler) CheckFavoriteItem(c echo.Context) error {
+ 	ctx := c.Request().Context()
+
+	userID, err := getUserID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	} 
+  
+	folders, err := h.ItemRepo.GetFolders(ctx, userID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	itemID, err := strconv.ParseInt(c.Param("itemID"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid itemID type")
+	}
+
+	var result = false
+
+	for _, folder := range folders {
+		items, err := h.ItemRepo.GetFavoriteItems(ctx, folder.FavoriteFolderID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		for _, item := range items {
+			if itemID == int64(item.ItemID) {
+				result = true
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
