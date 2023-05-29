@@ -148,7 +148,7 @@ type removeFavoriteItemRequest struct {
 }
 
 type addFavoriteFolderRequest struct {
-	FolderName string `json:"folder_name" validate:"required`
+	FolderName string `json:"folder_name" validate:"required"`
 }
 
 func GetSecret() string {
@@ -839,28 +839,27 @@ func (h *Handler) AddNewFavoriteFolder(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err)
 	}
-  
-  req := new(addFavoriteFolderRequest)
+
+	req := new(addFavoriteFolderRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	if err := h.ItemRepo.AddFavoriteFolder(ctx, userID, req.FolderName); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "cannot add a favorite folder")
-	}	
+	}
 
 	return c.JSON(http.StatusOK, "successful")
 }
 
-
 func (h *Handler) CheckFavoriteItem(c echo.Context) error {
- 	ctx := c.Request().Context()
+	ctx := c.Request().Context()
 
 	userID, err := getUserID(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err)
-	} 
-  
+	}
+
 	folders, err := h.ItemRepo.GetFolders(ctx, userID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
