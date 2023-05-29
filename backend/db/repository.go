@@ -61,7 +61,8 @@ type ItemRepository interface {
 	GetFolders(ctx context.Context, id int64) ([]domain.FavoriteFolder, error)
 	AddItemToFavoriteFolder(ctx context.Context, itemID int32, folderID int32) error
 	GetFavoriteItems(ctx context.Context, folderID int64) ([]domain.FavoriteItem, error)
-	RemoveFavoriteItem(tx context.Context, itemID int32, folderID int32) error
+	RemoveFavoriteItem(ctx context.Context, itemID int32, folderID int32) error
+	AddFavoriteFolder(ctx context.Context, userID int64, folderName string) error
 }
 
 type ItemDBRepository struct {
@@ -232,7 +233,7 @@ func (r *ItemDBRepository) AddItemToFavoriteFolder(ctx context.Context, itemID i
 }
 
 func (r *ItemDBRepository) GetFavoriteItems(ctx context.Context, folderID int64) ([]domain.FavoriteItem, error) {
-	rows, err := r.QueryContext(ctx, "SELECT * FROM favorite WHERE favorite_folder_id = ?", folderID)
+	rows, err := r.QueryContext(ctx, "SELECT DISTINCT * FROM favorite WHERE favorite_folder_id = ?", folderID)
 
 	if err != nil {
 		return nil, err
@@ -255,6 +256,13 @@ func (r *ItemDBRepository) GetFavoriteItems(ctx context.Context, folderID int64)
 
 func (r *ItemDBRepository) RemoveFavoriteItem(ctx context.Context, itemID int32, folderID int32) error {
 	if _, err := r.ExecContext(ctx, "DELETE FROM favorite WHERE item_id = ? and favorite_folder_id = ?", itemID, folderID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *ItemDBRepository) AddFavoriteFolder(ctx context.Context, userID int64, folderName string) error {
+	if _, err := r.ExecContext(ctx, "INSERT INTO favoriteFolders (user_id, favorite_folder_name) VALUES (?, ?)", userID, folderName); err != nil {
 		return err
 	}
 	return nil
