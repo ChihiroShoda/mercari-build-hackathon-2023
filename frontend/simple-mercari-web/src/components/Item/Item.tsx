@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -37,7 +37,8 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
   const [favoriteFolders, setFavoriteFolders] = useState<FavoriteFolder[]>([]);
   const [values, setValues] = useState<formDataType>(initialState);
   const [selectedRadioId, setSelectedRadioId] = useState<number | null>(null);
-
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [activeModal, setActiveModal] = useState<number | null>(null);
 
   async function getItemImage(itemId: number): Promise<Blob> {
     return await fetcherBlob(`/items/${itemId}/image`, {
@@ -63,8 +64,23 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
         toast.error(err.message);
       });
     }
+  
+    const checkFavoriteStatus = (itemId: number) => {
+      fetcher<boolean>(`/favorite/check/${itemId}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${cookies.token}`,
+          },
+        })
+        .then((data) => setIsFavorite(data))
+        .catch((err) => {
+          console.log(`GET error:`, err);
+          toast.error(err.message);
+        });
+    };
 
     const deleteFavoriteItem = (itemID: number) => {
+      //!どのフォルダにはいってるか調べる
       fetcher(`/favorite/delete`, {
         method: "POST",
         body: JSON.stringify({
@@ -72,6 +88,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
           folder_id: values.folder,
         }),
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${cookies.token}`,
         },
       })
@@ -90,22 +107,20 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
         const image = await getItemImage(item.id);
         setItemImage(URL.createObjectURL(image));
       }
-  
+       
       fetchData();
+      checkFavoriteStatus(item.id);
       getFavoriteFolders();
-    }, [item]);
+    }, [item.id]);
     
   const onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setValues({
-      ...values,
-      itemID: item.id,
-    });
+    setActiveModal(item.id);
     const target =  event.currentTarget.parentElement;
     const icon = target?.querySelector("i");
     if(icon?.classList.contains("bi-heart-fill")){
       icon?.classList.remove("bi-heart-fill");
       icon?.classList.toggle("bi-heart");
-      deleteFavoriteItem(item.id);
+      // deleteFavoriteItem(item.id);
     }else{
       icon?.classList.remove("bi-heart");
       icon?.classList.toggle("bi-heart-fill");
@@ -116,12 +131,13 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     }
   }; 
   const closeModal = () => {
-    if (!values.existingFolder && !values.newFolder) {
-      const target = document.getElementById("favorite");
-      const icon = target?.querySelector("i");
-      icon?.classList.remove("bi-heart-fill");
-      icon?.classList.toggle("bi-heart");
-    }
+    setActiveModal(null);
+    // if (!values.existingFolder && !values.newFolder) {
+    //   const target = document.getElementById("favorite");
+    //   const icon = target?.querySelector("i");
+    //   icon?.classList.remove("bi-heart-fill");
+    //   icon?.classList.toggle("bi-heart");
+    // }
     const modal = document.getElementById("id01");
     if (modal) {
       modal.style.display = "none";
@@ -159,15 +175,13 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(values)
-
     if (!values.existingFolder && !values.newFolder || values.existingFolder && values.newFolder) {
       toast.error("Please select OR enter a folder name");
       return;
     }
     if (values.existingFolder) {
       const data = {
-        item_id: values.itemID,
+        item_id:activeModal,
         folder_id: values.folder,
       };
       fetcher<{ id: number }>(`/favorite`, {
@@ -198,44 +212,46 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
     <div className="w3-card-4 itemList">
     <img src={itemImage} alt="..." onClick={() => navigate(`/item/${item.id}`)}></img>
     <button onClick={onClick} id = "favorite">
-      <i className="bi bi-heart"></i>
+    <i className={`bi ${isFavorite ? "bi-heart-fill" : "bi-heart"}`}></i>
     </button>
-    <div id="id01" className="w3-modal">
-    <div className="w3-modal-content">
-      <header className="w3-container"> 
-        <span onClick={closeModal} 
-        className="w3-button w3-display-topright">&times;</span>
-        <h2>Folders</h2>
-      </header>
-      <div className="w3-container" id="select-folder">
-      <form onSubmit={onSubmit}>
-        {favoriteFolders && favoriteFolders.map((folder) => (
-          <p key={folder.FavoriteFolderID}>
-            <input
-              className="w3-radio"
-              type="radio"
-              name="existingFolder"
-              value={folder.FavoriteFolderName}
-              onClick={(event) => onRadioClick(event, folder.FavoriteFolderID)}
-              onChange={(event) => onRadioChange(event, folder.FavoriteFolderID)}
-            />
-            <label>{folder.FavoriteFolderName}</label>
-          </p>
-        ))}
-        <input
-              type="text"
-              name="newFolder"
-              id="MerTextInput"
-              placeholder="+ New Folder"
-              onChange={onValueChange}
-        />
-         <button type="submit" id="MerButton">
-              Register
-        </button>
-      </form>
+      {activeModal !== null && activeModal === item.id && (
+      <div id="id01" className="w3-modal">
+      <div className="w3-modal-content">
+        <header className="w3-container"> 
+          <span onClick={closeModal} 
+          className="w3-button w3-display-topright">&times;</span>
+          <h2>Folders</h2>
+        </header>
+        <div className="w3-container" id="select-folder">
+        <form onSubmit={onSubmit}>
+          {favoriteFolders && favoriteFolders.map((folder) => (
+            <p key={folder.FavoriteFolderID}>
+              <input
+                className="w3-radio"
+                type="radio"
+                name="existingFolder"
+                value={folder.FavoriteFolderName}
+                onClick={(event) => onRadioClick(event, folder.FavoriteFolderID)}
+                onChange={(event) => onRadioChange(event, folder.FavoriteFolderID)}
+              />
+              <label>{folder.FavoriteFolderName}</label>
+            </p>
+          ))}
+          <input
+                type="text"
+                name="newFolder"
+                id="MerTextInput"
+                placeholder="+ New Folder"
+                onChange={onValueChange}
+          />
+          <button type="submit" id="MerButton">
+                Register
+          </button>
+        </form>
+        </div>
       </div>
-    </div>
   </div>
+  )}
     <div className="w3-container w3-center">
       <b>{item.name}</b>
       <p>￥{item.price}</p>
