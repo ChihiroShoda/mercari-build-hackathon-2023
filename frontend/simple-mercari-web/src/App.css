@@ -163,6 +163,52 @@ body {
   }
 
 /*---------------------------------
+　Item
+---------------------------------*/
+.w3-card-4 {
+  width:100%;
+  position: relative;
+}
+
+.w3-card-4 img{
+   width: 100%;
+  height: 200px;
+  object-fit: cover;
+  margin-bottom:20px;
+}
+
+.w3-card-4 #favorite{
+  position: absolute;
+  right: 20px;
+  bottom: 75px;
+  width: 60px;
+  height: 60px;
+  /* color: #ffffff; */
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.w3-card-4 button i{
+  font-size: 2rem;
+}
+
+.w3-card-4 #favorite .bi-heart-fill{
+  color:#ff7676;
+}
+
+.w3-modal .w3-modal-content {
+  margin-top:150px;
+  padding:20px;
+  width:400px;
+}
+
+.w3-modal #select-folder label{
+  padding-left:10px;
+}
+/*---------------------------------
 　ItemList
 ---------------------------------*/
 /* 
@@ -184,18 +230,6 @@ body {
   row-gap:40px;
   
 }
-.ItemCards .w3-card-4{
-  width:100%;
-}
-
-.w3-card-4 img{
-   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  margin-bottom:20px;
-}
-
-
 
 /*---------------------------------
 　Listing Button
@@ -218,6 +252,8 @@ body {
 }
 .Listing .w3-card-4{
   margin-left: 250px;
+  position: unset;
+  width: auto;
 }
 .Listing .w3-container .w3-center h1{
   font-weight:bold;
@@ -265,6 +301,9 @@ body {
 .ItemDetailContainer .ItemNameandImage h1{
   font-weight: bold;
   margin-bottom:30px;
+  text-align: center;
+  padding:10px;
+  /* border-bottom:#666 solid 1px ; */
 }
 .ItemDetailContainer .Detail h1{
   font-weight: bold;
@@ -276,6 +315,38 @@ body {
   font-weight: bold;
 }
 
+.EditButton {
+  /* color: var(--alias-color-text-inverse-default); */
+  background-color: #ff7676;
+  color: white;
+  font: inherit;
+  transition-timing-function: ease-in-out;
+  transition-duration: 0.1s;
+  display: inline-flex;
+  -webkit-box-align: center;
+  /* align-items: center; */
+  -webkit-box-pack: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding:10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  line-height: 1.4em;
+  white-space: nowrap;
+  text-align: center;
+  text-decoration: none;
+  /* vertical-align: middle; */
+  word-break: break-word;
+  border-color: transparent;
+  /* border-style: solid; */
+  /* border-width: 1px; */
+  border-radius: 4px;
+  cursor: pointer;
+  transition-property: background-color, color, fill;
+}
+
 /*---------------------------------
 　UserProfile
 ---------------------------------*/
@@ -283,12 +354,42 @@ body {
   margin:20px 100px;
 }
 
-
 .Balance{
   width: 400px;
   margin: 20px 0;
 }
 
+
+/*---------------------------------
+　Favorite
+---------------------------------*/
+.Favorite{
+  margin: 20px 100px;
+}
+
+.Favorite h1{
+  margin:20px;
+}
+.Favorite .w3-sidebar{
+  border-right:#666 solid 1px;
+  background-color: whitesmoke;
+  text-align:center;
+  padding:20px 0;
+  width:15%;
+}
+
+.Favorite .AddItem{
+  display: none;
+}
+
+.Favorite .w3-sidebar a{
+  font-size:1.5rem;
+  text-align:center;
+}
+
+.Favorite .MyItem{
+  margin-left:25%;
+}
 /*---------------------------------
 　Signup&Login
 ---------------------------------*/

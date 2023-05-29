@@ -4,6 +4,8 @@ import { Home } from "./components/Home";
 import { ItemDetail } from "./components/ItemDetail";
 import { UserProfile } from "./components/UserProfile";
 import { Listing } from "./components/Listing";
+import { Edit } from "./components/Edit";
+import { Favorite } from "./components/Favorite";
 import "./App.css";
 import { Header } from "./components/Header/Header";
 import { ToastContainer } from 'react-toastify';
@@ -22,6 +24,8 @@ export const App: React.VFC = () => {
             <Route path="/item/:id" element={<ItemDetail />} />
             <Route path="/user/:id" element={<UserProfile />} />
             <Route path="/sell" element={<Listing />} />
+            <Route path="/item/:id/edit" element={<Edit />} />
+            <Route path="/favorite" element={<Favorite />} />
           </Routes>
         </div>
       </BrowserRouter>
