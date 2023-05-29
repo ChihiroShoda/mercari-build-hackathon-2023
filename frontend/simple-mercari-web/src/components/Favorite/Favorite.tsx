@@ -74,9 +74,6 @@ export const Favorite: React.FC = () => {
       <div className="Favorite">
         <h1>Favorite Items</h1>
         <div className="w3-sidebar w3-bar-block">
-          <a href="/favorite" className="w3-bar-item w3-button">
-            All
-          </a>
           {favoriteFolders && favoriteFolders.map((folder) => (
             <a
                 key={folder.FavoriteFolderID}

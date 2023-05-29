@@ -204,7 +204,33 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
       });
   
     } else {
-      console.log("新しくフォルダを追加");
+      const data ={
+        "folder_name": values.newFolder,
+      }
+      fetcher<{ id: number }>(`/favorite/new`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      })
+      .then((data) => {
+        console.log(`POST success:`, data);
+        getFavoriteFolders();
+        setValues({ ...values, newFolder: "" });
+        const inputElements = document.getElementsByClassName("newFolderInput");
+        if (inputElements.length > 0) {
+          const inputElement = inputElements[0] as HTMLInputElement;
+          inputElement.value = ""; // 入力フィールドをクリアする
+        }
+        toast.success("New Folder added");
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+        console.error("POST error:", error);
+      });
     }
   }
 
@@ -241,6 +267,7 @@ export const Item: React.FC<{ item: Item }> = ({ item }) => {
                 type="text"
                 name="newFolder"
                 id="MerTextInput"
+                className="newFolderInput"
                 placeholder="+ New Folder"
                 onChange={onValueChange}
           />
